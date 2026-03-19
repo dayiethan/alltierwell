@@ -3,9 +3,11 @@
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
+import Link from "next/link";
 
 export default function AuthButton() {
   const [user, setUser] = useState<User | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
@@ -15,6 +17,16 @@ export default function AuthButton() {
         data: { user },
       } = await supabase.auth.getUser();
       setUser(user);
+
+      if (user) {
+        const { data: profile } = await supabase
+          .from("users")
+          .select("username")
+          .eq("id", user.id)
+          .single();
+        if (profile) setUsername(profile.username);
+      }
+
       setLoading(false);
     };
     getUser();
@@ -26,7 +38,7 @@ export default function AuthButton() {
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase.auth]);
+  }, [supabase]);
 
   const handleSignIn = async () => {
     await supabase.auth.signInWithOAuth({
@@ -52,13 +64,15 @@ export default function AuthButton() {
   if (user) {
     return (
       <div className="flex items-center gap-3">
-        {user.user_metadata?.avatar_url && (
-          <img
-            src={user.user_metadata.avatar_url}
-            alt="Avatar"
-            className="h-7 w-7 rounded-full"
-            referrerPolicy="no-referrer"
-          />
+        {user.user_metadata?.avatar_url && username && (
+          <Link href={`/user/${username}`}>
+            <img
+              src={user.user_metadata.avatar_url}
+              alt="Avatar"
+              className="h-7 w-7 rounded-full hover:ring-2 hover:ring-gray-300 transition-all"
+              referrerPolicy="no-referrer"
+            />
+          </Link>
         )}
         <button
           onClick={handleSignOut}
