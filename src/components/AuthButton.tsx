@@ -49,22 +49,16 @@ export default function AuthButton() {
     });
   };
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    window.location.href = "/";
-  };
-
   if (loading) {
     return (
-      <div className="h-8 w-20 animate-pulse rounded-md bg-muted" />
+      <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
     );
   }
 
   if (user) {
     return (
-      <div className="flex items-center gap-3">
-        {user.user_metadata?.avatar_url && username && (
+      <div className="flex items-center">
+        {user.user_metadata?.avatar_url && username ? (
           <Link href={`/user/${username}`}>
             <img
               src={user.user_metadata.avatar_url}
@@ -73,13 +67,14 @@ export default function AuthButton() {
               referrerPolicy="no-referrer"
             />
           </Link>
+        ) : (
+          <Link
+            href={username ? `/user/${username}` : "/settings"}
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground hover:ring-2 hover:ring-gray-300 transition-all"
+          >
+            {user.email?.charAt(0).toUpperCase() ?? "?"}
+          </Link>
         )}
-        <button
-          onClick={handleSignOut}
-          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-        >
-          Sign out
-        </button>
       </div>
     );
   }
