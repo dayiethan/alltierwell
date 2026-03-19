@@ -9,6 +9,7 @@ import SongPool from "@/components/SongPool";
 import TierSelector from "@/components/TierSelector";
 import ProgressBar from "@/components/ProgressBar";
 import { useCallback, useEffect, useState } from "react";
+import { useTheme } from "@/components/ThemeProvider";
 
 export default function RankPage() {
   const supabase = createClient();
@@ -19,6 +20,7 @@ export default function RankPage() {
   const [loading, setLoading] = useState(true);
 
   const { saveStatus, initializeLastSaved } = useAutoSave(tierMap, userId);
+  const { themeDef } = useTheme();
 
   // Load user, songs, and existing tier entries
   useEffect(() => {
@@ -86,7 +88,7 @@ export default function RankPage() {
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-gray-400">Loading your tier list...</p>
+        <p className="text-muted-foreground italic">{themeDef.emptyStates.loading}</p>
       </div>
     );
   }
@@ -105,7 +107,7 @@ export default function RankPage() {
       </div>
 
       {/* Tier rows */}
-      <div className="overflow-hidden rounded-lg border border-gray-200">
+      <div className="overflow-hidden rounded-lg border border-border">
         {TIERS.map((tier) => (
           <TierRow
             key={tier}

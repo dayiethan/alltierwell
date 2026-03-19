@@ -22,16 +22,16 @@ export default function ProgressBar({
           <span className="font-medium">
             {ranked} / {total} songs ranked
           </span>
-          <span className="text-gray-400">{pct}%</span>
+          <span className="text-muted-foreground">{pct}%</span>
         </div>
-        <div className="mt-1 h-2 overflow-hidden rounded-full bg-gray-100">
+        <div className="mt-1 h-2 overflow-hidden rounded-full bg-muted">
           <div
-            className="h-full rounded-full bg-gray-800 transition-all duration-300"
+            className="h-full rounded-full bg-accent transition-all duration-300"
             style={{ width: `${pct}%` }}
           />
         </div>
       </div>
-      <span className="flex-shrink-0 text-xs text-gray-400">
+      <span className="flex-shrink-0 text-xs text-muted-foreground">
         {saveStatus === "saving" && "Saving..."}
         {saveStatus === "saved" && "Saved"}
         {saveStatus === "error" && "Save failed"}

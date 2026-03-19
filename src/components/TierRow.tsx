@@ -3,6 +3,7 @@
 import type { Song, Tier } from "@/lib/types";
 import { TIER_COLORS } from "@/lib/constants";
 import SongChip from "./SongChip";
+import { useTheme } from "./ThemeProvider";
 
 interface TierRowProps {
   tier: Tier;
@@ -11,8 +12,9 @@ interface TierRowProps {
 }
 
 export default function TierRow({ tier, songs, onSongClick }: TierRowProps) {
+  const { themeDef } = useTheme();
   return (
-    <div className="flex min-h-[52px] border-b border-gray-200">
+    <div className="flex min-h-[52px] border-b border-border">
       <div
         className="flex w-14 flex-shrink-0 items-center justify-center text-lg font-bold text-gray-800"
         style={{ backgroundColor: TIER_COLORS[tier] }}
@@ -30,8 +32,8 @@ export default function TierRow({ tier, songs, onSongClick }: TierRowProps) {
           />
         ))}
         {songs.length === 0 && (
-          <span className="py-1 text-xs text-gray-300">
-            Click songs below to add them here
+          <span className="py-1 text-xs text-muted-foreground/50 italic">
+            {themeDef.emptyStates.tierEmpty}
           </span>
         )}
       </div>

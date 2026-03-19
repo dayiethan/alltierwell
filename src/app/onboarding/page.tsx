@@ -108,7 +108,7 @@ export default function OnboardingPage() {
     <div className="flex min-h-[80vh] items-center justify-center">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-md space-y-6 rounded-xl border border-gray-200 bg-white p-8"
+        className="w-full max-w-md space-y-6 rounded-xl border border-border bg-card p-8"
       >
         <div className="text-center">
           {avatarUrl && (
@@ -120,13 +120,13 @@ export default function OnboardingPage() {
             />
           )}
           <h1 className="text-2xl font-bold">Choose your username</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             This will be your public profile URL
           </p>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-muted-foreground">
             Username
           </label>
           <div className="relative mt-1">
@@ -138,7 +138,7 @@ export default function OnboardingPage() {
               value={username}
               onChange={handleUsernameChange}
               maxLength={20}
-              className="w-full rounded-md border border-gray-300 py-2 pl-8 pr-10 text-sm focus:border-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-500"
+              className="w-full rounded-md border border-border py-2 pl-8 pr-10 text-sm focus:border-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-500"
               placeholder="swiftie_13"
               autoFocus
             />
@@ -162,7 +162,7 @@ export default function OnboardingPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-muted-foreground">
             Display Name
           </label>
           <input
@@ -170,7 +170,7 @@ export default function OnboardingPage() {
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             maxLength={50}
-            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-500"
+            className="mt-1 w-full rounded-md border border-border px-3 py-2 text-sm focus:border-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-500"
           />
         </div>
 
@@ -181,7 +181,7 @@ export default function OnboardingPage() {
         <button
           type="submit"
           disabled={!isValid || !available || submitting}
-          className="w-full rounded-md bg-foreground px-4 py-2.5 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
+          className="w-full rounded-md bg-accent px-4 py-2.5 text-sm font-medium text-accent-foreground hover:opacity-90 disabled:opacity-50"
         >
           {submitting ? "Creating profile..." : "Continue"}
         </button>

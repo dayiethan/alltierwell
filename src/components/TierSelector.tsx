@@ -37,11 +37,11 @@ export default function TierSelector({
         if (e.target === overlayRef.current) onClose();
       }}
     >
-      <div className="w-full max-w-sm rounded-t-xl bg-white p-5 shadow-xl md:rounded-xl">
+      <div className="w-full max-w-sm rounded-t-xl bg-card p-5 shadow-xl md:rounded-xl">
         <div className="mb-4 text-center">
-          <p className="text-sm text-gray-500">Assign tier for</p>
+          <p className="text-sm text-muted-foreground">Assign tier for</p>
           <p className="mt-1 font-semibold">{song.title}</p>
-          <p className="text-xs text-gray-400">{song.album}</p>
+          <p className="text-xs text-muted-foreground">{song.album}</p>
         </div>
 
         <div className="grid grid-cols-6 gap-2">
@@ -65,14 +65,14 @@ export default function TierSelector({
           {currentTier && (
             <button
               onClick={onUnrank}
-              className="flex-1 rounded-lg border border-gray-200 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
+              className="flex-1 rounded-lg border border-border py-2 text-sm font-medium text-muted-foreground hover:bg-muted"
             >
               Remove from tier list
             </button>
           )}
           <button
             onClick={onClose}
-            className="flex-1 rounded-lg border border-gray-200 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
+            className="flex-1 rounded-lg border border-border py-2 text-sm font-medium text-muted-foreground hover:bg-muted"
           >
             Cancel
           </button>

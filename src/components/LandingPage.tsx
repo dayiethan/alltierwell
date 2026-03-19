@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/client";
 import { ALBUMS, TIERS, TIER_COLORS } from "@/lib/constants";
 import { useEffect, useRef } from "react";
+import { useWatermark } from "./ThemeProvider";
 
 const UNIQUE_ALBUMS = ALBUMS.filter(
   (a, i, arr) => arr.findIndex((b) => b.order === a.order) === i
@@ -50,6 +51,8 @@ interface LandingPageProps {
 export default function LandingPage({ floatingImages }: LandingPageProps) {
   const supabase = createClient();
   const canvasRef = useRef<HTMLDivElement>(null);
+
+  useWatermark(false);
 
   const handleSignIn = async () => {
     await supabase.auth.signInWithOAuth({
@@ -156,26 +159,26 @@ export default function LandingPage({ floatingImages }: LandingPageProps) {
       <section className="relative flex h-[calc(100vh-3.5rem)] flex-col items-center justify-center px-4">
         {/* Floating album covers */}
         <div ref={canvasRef} className="absolute inset-0 -z-10 overflow-hidden" />
-        <div className="absolute inset-0 -z-10 bg-white/40" />
+        <div className="absolute inset-0 -z-10" style={{ backgroundColor: "color-mix(in srgb, var(--background) 40%, transparent)" }} />
 
         <div className="relative text-center">
           <h1 className="text-5xl font-bold tracking-tight sm:text-7xl">
             All Tier Well
           </h1>
-          <p className="mx-auto mt-5 max-w-md text-lg text-gray-600 sm:text-xl">
+          <p className="mx-auto mt-5 max-w-md text-lg text-muted-foreground sm:text-xl">
             Rank every Taylor Swift song. Share your taste. See how you compare.
           </p>
 
           <button
             onClick={handleSignIn}
-            className="mt-10 rounded-xl bg-foreground px-8 py-3.5 text-base font-semibold text-background shadow-lg hover:opacity-90 transition-opacity"
+            className="mt-10 rounded-xl bg-accent px-8 py-3.5 text-base font-semibold text-accent-foreground shadow-lg hover:opacity-90 transition-opacity"
           >
             Sign in with Google
           </button>
         </div>
 
         {/* Scroll hint */}
-        <div className="absolute bottom-8 flex flex-col items-center text-gray-300">
+        <div className="absolute bottom-8 flex flex-col items-center text-muted-foreground/50">
           <svg
             className="h-5 w-5 animate-bounce"
             fill="none"
@@ -193,8 +196,8 @@ export default function LandingPage({ floatingImages }: LandingPageProps) {
       </section>
 
       {/* How it works */}
-      <section className="border-t border-gray-100 bg-gray-50/50 px-4 py-16">
-        <h2 className="text-center text-sm font-semibold text-gray-400 uppercase tracking-wider">
+      <section className="border-t border-border bg-muted/50 px-4 py-16">
+        <h2 className="text-center text-sm font-semibold text-muted-foreground uppercase tracking-wider">
           How it works
         </h2>
         <div className="mx-auto mt-8 grid max-w-3xl gap-8 sm:grid-cols-3">
@@ -217,14 +220,14 @@ export default function LandingPage({ floatingImages }: LandingPageProps) {
       </section>
 
       {/* Mini tier list preview */}
-      <section className="border-t border-gray-100 px-4 py-16">
-        <h2 className="text-center text-sm font-semibold text-gray-400 uppercase tracking-wider">
+      <section className="border-t border-border px-4 py-16">
+        <h2 className="text-center text-sm font-semibold text-muted-foreground uppercase tracking-wider">
           Preview
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-400">
+        <p className="mt-2 text-center text-sm text-muted-foreground">
           Drag and drop songs into tiers — here&apos;s what it looks like
         </p>
-        <div className="mx-auto mt-8 max-w-2xl overflow-hidden rounded-xl border border-gray-200 shadow-sm">
+        <div className="mx-auto mt-8 max-w-2xl overflow-hidden rounded-xl border border-border shadow-sm">
           {SAMPLE_TIER_LIST.map(({ tier, songs }) => (
             <MiniTierRow key={tier} tier={tier} songs={songs} />
           ))}
@@ -232,7 +235,7 @@ export default function LandingPage({ floatingImages }: LandingPageProps) {
       </section>
 
       {/* Scrolling album strip */}
-      <section className="border-t border-gray-100 py-10 overflow-hidden">
+      <section className="border-t border-border py-10 overflow-hidden">
         <div className="flex w-max gap-3" style={{ animation: "marquee 40s linear infinite" }}>
           {Array.from({ length: 6 }, (_, setIndex) =>
             UNIQUE_ALBUMS.map((album, i) => (
@@ -268,11 +271,11 @@ function Step({
 }) {
   return (
     <div className="text-center">
-      <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-gray-900 text-sm font-bold text-white">
+      <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-accent text-sm font-bold text-accent-foreground">
         {number}
       </div>
       <h3 className="mt-3 text-base font-semibold">{title}</h3>
-      <p className="mt-1.5 text-sm text-gray-500">{description}</p>
+      <p className="mt-1.5 text-sm text-muted-foreground">{description}</p>
     </div>
   );
 }
@@ -290,7 +293,7 @@ function MiniTierRow({
       | undefined;
 
   return (
-    <div className="flex border-b border-gray-100 last:border-b-0">
+    <div className="flex border-b border-border last:border-b-0">
       <div
         className="flex w-12 flex-shrink-0 items-center justify-center text-lg font-bold sm:w-14"
         style={{ backgroundColor: TIER_COLORS[tier] + "40" }}
@@ -303,7 +306,7 @@ function MiniTierRow({
           return (
             <span
               key={song.title}
-              className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 px-2 py-0.5 text-xs"
+              className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-0.5 text-xs"
               style={{ backgroundColor: TIER_COLORS[tier] + "15" }}
             >
               {a?.image ? (

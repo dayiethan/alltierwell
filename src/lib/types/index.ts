@@ -16,6 +16,7 @@ export interface UserProfile {
   avatar_url: string | null;
   created_at: string;
   is_public: boolean;
+  theme_era: string | null;
 }
 
 export interface TierEntry {

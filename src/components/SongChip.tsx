@@ -23,7 +23,7 @@ export default function SongChip({
   return (
     <button
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 rounded-md border border-gray-200 px-2 text-left text-sm transition-colors hover:border-gray-400 ${
+      className={`inline-flex items-center gap-1.5 rounded-md border border-border px-2 text-left text-sm transition-colors hover:border-muted-foreground ${
         compact ? "py-0.5" : "py-1"
       }`}
       style={
@@ -50,7 +50,7 @@ export default function SongChip({
       />
       <span className="truncate">{song.title}</span>
       {song.is_vault && (
-        <span className="text-[10px] text-gray-400">(V)</span>
+        <span className="text-[10px] text-muted-foreground">(V)</span>
       )}
     </button>
   );

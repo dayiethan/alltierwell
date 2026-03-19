@@ -4,6 +4,7 @@ import type { Song } from "@/lib/types";
 import { ALBUMS, ALBUM_SHORT_NAMES } from "@/lib/constants";
 import SongChip from "./SongChip";
 import { useRef, useState } from "react";
+import { useTheme } from "./ThemeProvider";
 
 interface SongPoolProps {
   songs: Song[];
@@ -13,6 +14,7 @@ interface SongPoolProps {
 export default function SongPool({ songs, onSongClick }: SongPoolProps) {
   const [selectedAlbum, setSelectedAlbum] = useState<string | null>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
+  const { themeDef } = useTheme();
 
   const filteredSongs = selectedAlbum
     ? songs.filter((s) => s.album === selectedAlbum)
@@ -20,7 +22,7 @@ export default function SongPool({ songs, onSongClick }: SongPoolProps) {
 
   return (
     <div className="mt-6">
-      <h3 className="mb-3 text-sm font-semibold text-gray-500 uppercase tracking-wider">
+      <h3 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
         Unranked Songs ({songs.length})
       </h3>
 
@@ -33,8 +35,8 @@ export default function SongPool({ songs, onSongClick }: SongPoolProps) {
           onClick={() => setSelectedAlbum(null)}
           className={`flex-shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
             selectedAlbum === null
-              ? "bg-gray-900 text-white"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              ? "bg-accent text-accent-foreground"
+              : "bg-muted text-muted-foreground hover:bg-border"
           }`}
         >
           All
@@ -48,8 +50,8 @@ export default function SongPool({ songs, onSongClick }: SongPoolProps) {
               onClick={() => setSelectedAlbum(album.name)}
               className={`flex-shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                 selectedAlbum === album.name
-                  ? "bg-gray-900 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  ? "bg-accent text-accent-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-border"
               }`}
             >
               {ALBUM_SHORT_NAMES[album.name] ?? album.name} ({count})
@@ -68,9 +70,9 @@ export default function SongPool({ songs, onSongClick }: SongPoolProps) {
           />
         ))}
         {filteredSongs.length === 0 && (
-          <p className="py-4 text-sm text-gray-400">
+          <p className="py-4 text-sm text-muted-foreground italic">
             {songs.length === 0
-              ? "All songs ranked!"
+              ? themeDef.emptyStates.allRanked
               : "No unranked songs in this album."}
           </p>
         )}

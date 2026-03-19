@@ -1,3 +1,5 @@
+"use client";
+
 import type { Song, Tier, TierEntry } from "@/lib/types";
 import { TIERS, TIER_COLORS, ALBUMS } from "@/lib/constants";
 
@@ -36,9 +38,9 @@ export default function TierListDisplay({
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-gray-200">
+    <div className="overflow-hidden rounded-lg border border-border">
       {TIERS.map((tier) => (
-        <div key={tier} className="flex min-h-[44px] border-b border-gray-200 last:border-b-0">
+        <div key={tier} className="flex min-h-[44px] border-b border-border last:border-b-0">
           <div
             className="flex w-12 flex-shrink-0 items-center justify-center text-base font-bold text-gray-800"
             style={{ backgroundColor: TIER_COLORS[tier] }}
@@ -47,24 +49,37 @@ export default function TierListDisplay({
           </div>
           <div className="flex flex-1 flex-wrap gap-1 p-1.5">
             {tierGroups[tier].map((song) => {
-              const albumColor =
-                ALBUMS.find((a) => a.name === song.album)?.color ?? "#888";
+              const album = ALBUMS.find((a) => a.name === song.album) as
+                | { name: string; color: string; image: string }
+                | undefined;
               return (
                 <span
                   key={song.id}
-                  className="inline-flex items-center gap-1 rounded border border-gray-100 px-2 py-0.5 text-xs"
+                  className="inline-flex items-center gap-1 rounded border border-border px-2 py-0.5 text-xs"
                   style={{ backgroundColor: `${TIER_COLORS[tier]}15` }}
                 >
+                  {album?.image ? (
+                    <img
+                      src={album.image}
+                      alt=""
+                      className="h-3.5 w-3.5 flex-shrink-0 rounded-sm object-cover"
+                      onError={(e) => {
+                        const el = e.target as HTMLImageElement;
+                        el.style.display = "none";
+                        el.nextElementSibling?.classList.remove("hidden");
+                      }}
+                    />
+                  ) : null}
                   <span
-                    className="h-2 w-2 rounded-full"
-                    style={{ backgroundColor: albumColor }}
+                    className={`h-3.5 w-3.5 flex-shrink-0 rounded-sm ${album?.image ? "hidden" : ""}`}
+                    style={{ backgroundColor: (album?.color ?? "#888") + "40" }}
                   />
                   {song.title}
                 </span>
               );
             })}
             {tierGroups[tier].length === 0 && (
-              <span className="py-1 text-xs text-gray-300">—</span>
+              <span className="py-1 text-xs text-muted-foreground/50">—</span>
             )}
           </div>
         </div>

@@ -57,7 +57,7 @@ export default function AuthButton() {
 
   if (loading) {
     return (
-      <div className="h-8 w-20 animate-pulse rounded-md bg-gray-200" />
+      <div className="h-8 w-20 animate-pulse rounded-md bg-muted" />
     );
   }
 
@@ -76,7 +76,7 @@ export default function AuthButton() {
         )}
         <button
           onClick={handleSignOut}
-          className="text-sm font-medium text-gray-600 hover:text-gray-900"
+          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           Sign out
         </button>
@@ -87,7 +87,7 @@ export default function AuthButton() {
   return (
     <button
       onClick={handleSignIn}
-      className="rounded-md bg-foreground px-4 py-1.5 text-sm font-medium text-background hover:opacity-90"
+      className="rounded-md bg-accent px-4 py-1.5 text-sm font-medium text-accent-foreground hover:opacity-90"
     >
       Sign in with Google
     </button>
