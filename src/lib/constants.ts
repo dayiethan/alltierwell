@@ -21,22 +21,22 @@ export const TIER_ORDER: Record<Tier, number> = {
 };
 
 export const ALBUMS = [
-  { name: "Taylor Swift", order: 1, color: "#1DB954", image: "/albums/taylor-swift.jpg" },
-  { name: "Fearless", order: 2, color: "#C9A96E", image: "/albums/fearless.jpg" },
-  { name: "Fearless (Taylor's Version)", order: 2, color: "#C9A96E", image: "/albums/fearless.jpg" },
-  { name: "Speak Now", order: 3, color: "#8B45A6", image: "/albums/speak-now.jpg" },
-  { name: "Speak Now (Taylor's Version)", order: 3, color: "#8B45A6", image: "/albums/speak-now.jpg" },
-  { name: "Red", order: 4, color: "#8B0000", image: "/albums/red.jpg" },
-  { name: "Red (Taylor's Version)", order: 4, color: "#8B0000", image: "/albums/red.jpg" },
-  { name: "1989", order: 5, color: "#6CC4E8", image: "/albums/1989.jpg" },
-  { name: "1989 (Taylor's Version)", order: 5, color: "#6CC4E8", image: "/albums/1989.jpg" },
-  { name: "reputation", order: 6, color: "#2D2D2D", image: "/albums/reputation.jpg" },
-  { name: "Lover", order: 7, color: "#FFB6C1", image: "/albums/lover.jpg" },
-  { name: "folklore", order: 8, color: "#808080", image: "/albums/folklore.jpg" },
-  { name: "evermore", order: 9, color: "#C67B30", image: "/albums/evermore.jpg" },
-  { name: "Midnights", order: 10, color: "#191970", image: "/albums/midnights.jpg" },
-  { name: "The Tortured Poets Department", order: 11, color: "#F5F5DC", image: "/albums/ttpd.jpg" },
-  { name: "The Life of a Showgirl", order: 12, color: "#E8333A", image: "/albums/showgirl.jpg" },
+  { name: "Taylor Swift", order: 1, color: "#1DB954", image: "/albums/taylor-swift.png" },
+  { name: "Fearless", order: 2, color: "#C9A96E", image: "/albums/fearless.png" },
+  { name: "Fearless (Taylor's Version)", order: 2, color: "#C9A96E", image: "/albums/fearless-tv.png" },
+  { name: "Speak Now", order: 3, color: "#8B45A6", image: "/albums/speak-now.png" },
+  { name: "Speak Now (Taylor's Version)", order: 3, color: "#8B45A6", image: "/albums/speak-now-tv.png" },
+  { name: "Red", order: 4, color: "#8B0000", image: "/albums/red.png" },
+  { name: "Red (Taylor's Version)", order: 4, color: "#8B0000", image: "/albums/red-tv.png" },
+  { name: "1989", order: 5, color: "#6CC4E8", image: "/albums/1989.png" },
+  { name: "1989 (Taylor's Version)", order: 5, color: "#6CC4E8", image: "/albums/1989-tv.png" },
+  { name: "reputation", order: 6, color: "#2D2D2D", image: "/albums/reputation.png" },
+  { name: "Lover", order: 7, color: "#FFB6C1", image: "/albums/lover.png" },
+  { name: "folklore", order: 8, color: "#808080", image: "/albums/folklore.png" },
+  { name: "evermore", order: 9, color: "#C67B30", image: "/albums/evermore.png" },
+  { name: "Midnights", order: 10, color: "#191970", image: "/albums/midnights.png" },
+  { name: "The Tortured Poets Department", order: 11, color: "#F5F5DC", image: "/albums/ttpd.png" },
+  { name: "The Life of a Showgirl", order: 12, color: "#E8333A", image: "/albums/tloas.png" },
 ] as const;
 
 export const ALBUM_SHORT_NAMES: Record<string, string> = {

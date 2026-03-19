@@ -16,14 +16,15 @@ export default function SongChip({
   onClick,
   compact = false,
 }: SongChipProps) {
-  const albumColor =
-    ALBUMS.find((a) => a.name === song.album)?.color ?? "#888";
+  const album = ALBUMS.find((a) => a.name === song.album);
+  const albumColor = album?.color ?? "#888";
+  const albumImage = album?.image;
 
   return (
     <button
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 rounded-md border border-gray-200 px-2.5 text-left text-sm transition-colors hover:border-gray-400 ${
-        compact ? "py-1" : "py-1.5"
+      className={`inline-flex items-center gap-1.5 rounded-md border border-gray-200 px-2 text-left text-sm transition-colors hover:border-gray-400 ${
+        compact ? "py-0.5" : "py-1"
       }`}
       style={
         tier
@@ -31,9 +32,21 @@ export default function SongChip({
           : undefined
       }
     >
+      {albumImage ? (
+        <img
+          src={albumImage}
+          alt=""
+          className="h-4 w-4 flex-shrink-0 rounded-sm object-cover"
+          onError={(e) => {
+            const el = e.target as HTMLImageElement;
+            el.style.display = "none";
+            el.nextElementSibling?.classList.remove("hidden");
+          }}
+        />
+      ) : null}
       <span
-        className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
-        style={{ backgroundColor: albumColor }}
+        className={`h-4 w-4 flex-shrink-0 rounded-sm ${albumImage ? "hidden" : ""}`}
+        style={{ backgroundColor: albumColor + "40" }}
       />
       <span className="truncate">{song.title}</span>
       {song.is_vault && (
