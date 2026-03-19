@@ -102,7 +102,8 @@ export default function LandingPage({ floatingImages }: LandingPageProps) {
         img.removeAttribute("src");
       };
 
-      const size = 80 + Math.random() * 80;
+      const scale = Math.min(window.innerWidth / 1200, 1);
+      const size = (100 + Math.random() * 100) * (0.3 + 0.7 * scale);
       img.style.width = `${size}px`;
       img.style.height = `${size}px`;
 
@@ -232,27 +233,24 @@ export default function LandingPage({ floatingImages }: LandingPageProps) {
 
       {/* Scrolling album strip */}
       <section className="border-t border-gray-100 py-10 overflow-hidden">
-        <div
-          className="flex gap-3 w-max"
-          style={{
-            animation: "marquee 30s linear infinite",
-          }}
-        >
-          {[...UNIQUE_ALBUMS, ...UNIQUE_ALBUMS].map((album, i) => (
-            <div key={`${album.name}-${i}`} className="flex-shrink-0">
-              <img
-                src={album.image}
-                alt={album.name}
-                className="h-16 w-16 rounded-lg object-cover shadow-sm sm:h-20 sm:w-20"
-                onError={(e) => {
-                  const el = e.target as HTMLImageElement;
-                  el.style.backgroundColor = album.color + "30";
-                  el.style.border = "1px solid " + album.color + "20";
-                  el.removeAttribute("src");
-                }}
-              />
-            </div>
-          ))}
+        <div className="flex w-max gap-3" style={{ animation: "marquee 40s linear infinite" }}>
+          {Array.from({ length: 6 }, (_, setIndex) =>
+            UNIQUE_ALBUMS.map((album, i) => (
+              <div key={`${setIndex}-${album.name}-${i}`} className="flex-shrink-0">
+                <img
+                  src={album.image}
+                  alt={album.name}
+                  className="h-16 w-16 rounded-lg object-cover shadow-sm sm:h-20 sm:w-20"
+                  onError={(e) => {
+                    const el = e.target as HTMLImageElement;
+                    el.style.backgroundColor = album.color + "30";
+                    el.style.border = "1px solid " + album.color + "20";
+                    el.removeAttribute("src");
+                  }}
+                />
+              </div>
+            ))
+          )}
         </div>
       </section>
     </div>
