@@ -5,40 +5,31 @@ import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 
-export default function AuthButton() {
-  const [user, setUser] = useState<User | null>(null);
+interface AuthButtonProps {
+  user: User | null;
+  loading: boolean;
+}
+
+export default function AuthButton({ user, loading }: AuthButtonProps) {
   const [username, setUsername] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
   useEffect(() => {
-    const getUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUser(user);
+    if (!user) {
+      setUsername(null);
+      return;
+    }
 
-      if (user) {
-        const { data: profile } = await supabase
-          .from("users")
-          .select("username")
-          .eq("id", user.id)
-          .single();
-        if (profile) setUsername(profile.username);
-      }
-
-      setLoading(false);
+    const fetchUsername = async () => {
+      const { data: profile } = await supabase
+        .from("users")
+        .select("username")
+        .eq("id", user.id)
+        .single();
+      if (profile) setUsername(profile.username);
     };
-    getUser();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, [supabase]);
+    fetchUsername();
+  }, [user, supabase]);
 
   const handleSignIn = async () => {
     await supabase.auth.signInWithOAuth({

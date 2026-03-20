@@ -9,15 +9,26 @@ interface ProfileActionsProps {
   username: string;
   isOwner: boolean;
   currentUserId?: string;
+  targetUserId: string;
 }
 
 export default function ProfileActions({
   username,
   isOwner,
   currentUserId,
+  targetUserId,
 }: ProfileActionsProps) {
   const [copied, setCopied] = useState<"profile" | "compare" | null>(null);
   const router = useRouter();
+
+  const logEvent = (eventType: string) => {
+    const supabase = createClient();
+    supabase.from("user_events").insert({
+      event_type: eventType,
+      actor_id: currentUserId ?? null,
+      target_user_id: targetUserId,
+    });
+  };
 
   const handleCopy = async (type: "profile" | "compare") => {
     const url =
@@ -28,6 +39,7 @@ export default function ProfileActions({
       await navigator.clipboard.writeText(url);
       setCopied(type);
       setTimeout(() => setCopied(null), 2000);
+      logEvent(type === "profile" ? "share_profile_click" : "compare_with_me_click");
     } catch {
       // Fallback for browsers without clipboard API
     }
@@ -77,6 +89,7 @@ export default function ProfileActions({
       {!isOwner && currentUserId && (
         <Link
           href={`/compare/${username}`}
+          onClick={() => logEvent("compare_button_click")}
           className="rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-accent-foreground hover:opacity-90"
         >
           Compare

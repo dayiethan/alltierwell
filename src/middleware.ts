@@ -68,6 +68,13 @@ export async function middleware(request: NextRequest) {
       url.pathname = "/onboarding";
       return NextResponse.redirect(url);
     }
+
+    // Update last_active_at (fire-and-forget)
+    supabase
+      .from("users")
+      .update({ last_active_at: new Date().toISOString() })
+      .eq("id", user.id)
+      .then();
   }
 
   // If user already has a profile, don't let them visit onboarding

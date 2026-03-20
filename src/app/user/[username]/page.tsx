@@ -64,6 +64,15 @@ export default async function UserProfilePage({ params }: Props) {
 
   const stats = computeStats(entries, songs);
 
+  // Log profile view (fire-and-forget)
+  if (currentUser?.id !== typedProfile.id) {
+    supabase.from("user_events").insert({
+      event_type: "profile_view",
+      actor_id: currentUser?.id ?? null,
+      target_user_id: typedProfile.id,
+    });
+  }
+
   return (
     <div className="py-8">
       {/* Profile header */}
@@ -84,6 +93,7 @@ export default async function UserProfilePage({ params }: Props) {
           username={typedProfile.username}
           isOwner={isOwner}
           currentUserId={currentUser?.id}
+          targetUserId={typedProfile.id}
         />
       </div>
 

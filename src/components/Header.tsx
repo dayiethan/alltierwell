@@ -1,13 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import type { User } from "@supabase/supabase-js";
 import AuthButton from "./AuthButton";
 import { useTheme } from "./ThemeProvider";
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const { themeDef } = useTheme();
+  const supabase = createClient();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+      setLoading(false);
+    };
+    getUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase]);
+
+  const isLoggedIn = !loading && user !== null;
 
   return (
     <header
@@ -36,16 +62,10 @@ export default function Header() {
           {/* Desktop nav */}
           <nav className="hidden items-center gap-6 md:flex">
             <Link
-              href="/rank"
+              href="/search"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
-              My Tier List
-            </Link>
-            <Link
-              href="/compare"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Compare
+              Search
             </Link>
             <Link
               href="/stats"
@@ -53,13 +73,29 @@ export default function Header() {
             >
               Stats
             </Link>
-            <Link
-              href="/settings"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Settings
-            </Link>
-            <AuthButton />
+            {isLoggedIn && (
+              <>
+                <Link
+                  href="/rank"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  My Tier List
+                </Link>
+                <Link
+                  href="/compare"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Compare
+                </Link>
+                <Link
+                  href="/settings"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Settings
+                </Link>
+              </>
+            )}
+            <AuthButton user={user} loading={loading} />
           </nav>
 
           {/* Mobile hamburger */}
@@ -105,18 +141,11 @@ export default function Header() {
         >
           <nav className="flex flex-col gap-3 pt-3">
             <Link
-              href="/rank"
+              href="/search"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               onClick={() => setMenuOpen(false)}
             >
-              My Tier List
-            </Link>
-            <Link
-              href="/compare"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              onClick={() => setMenuOpen(false)}
-            >
-              Compare
+              Search
             </Link>
             <Link
               href="/stats"
@@ -125,14 +154,32 @@ export default function Header() {
             >
               Stats
             </Link>
-            <Link
-              href="/settings"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              onClick={() => setMenuOpen(false)}
-            >
-              Settings
-            </Link>
-            <AuthButton />
+            {isLoggedIn && (
+              <>
+                <Link
+                  href="/rank"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  My Tier List
+                </Link>
+                <Link
+                  href="/compare"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Compare
+                </Link>
+                <Link
+                  href="/settings"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Settings
+                </Link>
+              </>
+            )}
+            <AuthButton user={user} loading={loading} />
           </nav>
         </div>
       )}

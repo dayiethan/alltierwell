@@ -8,6 +8,7 @@ import {
   Oswald,
   DM_Sans,
 } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import Header from "@/components/Header";
 import ThemeProvider from "@/components/ThemeProvider";
 import "./globals.css";
@@ -73,6 +74,7 @@ export default function RootLayout({
           <Header />
           <main className="mx-auto max-w-5xl px-4">{children}</main>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );

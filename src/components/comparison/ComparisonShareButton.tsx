@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function ComparisonShareButton() {
   const [copied, setCopied] = useState(false);
@@ -10,6 +11,13 @@ export default function ComparisonShareButton() {
       await navigator.clipboard.writeText(window.location.href);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+
+      // Log event (fire-and-forget)
+      const supabase = createClient();
+      supabase.from("user_events").insert({
+        event_type: "share_comparison_click",
+        metadata: { url: window.location.pathname },
+      });
     } catch {
       // Fallback for browsers without clipboard API
     }

@@ -51,6 +51,12 @@ export default async function ComparisonPage({ params }: Props) {
 
   const result = computeComparison(entries1, entries2, songs);
 
+  // Log this comparison (fire-and-forget, don't block render)
+  supabase.from("comparison_log").insert({
+    user1_id: user1.id,
+    user2_id: user2.id,
+  });
+
   return (
     <div className="py-8">
       {/* User badges header */}

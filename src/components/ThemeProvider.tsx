@@ -102,7 +102,7 @@ export default function ThemeProvider({
   const [theme, setThemeState] = useState<EraTheme>("default");
   const supabase = createClient();
 
-  // Load saved theme on mount
+  // Load saved theme on mount + reset on sign-out
   useEffect(() => {
     const load = async () => {
       const {
@@ -123,6 +123,17 @@ export default function ThemeProvider({
       }
     };
     load();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        setThemeState("default");
+        applyTheme("default");
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, [supabase]);
 
   // Apply theme whenever it changes
