@@ -4,6 +4,8 @@ import PersonalityInsights from "./comparison/PersonalityInsights";
 import AgreementsSection from "./comparison/AgreementsSection";
 import DisagreementsSection from "./comparison/DisagreementsSection";
 import AlbumAlignment from "./comparison/AlbumAlignment";
+import EraIdentity from "./comparison/EraIdentity";
+import VaultSection from "./comparison/VaultSection";
 
 interface ComparisonCardProps {
   result: ComparisonResult;
@@ -18,14 +20,14 @@ export default function ComparisonCard({
 }: ComparisonCardProps) {
   if (result.sharedSongsCount === 0) {
     return (
-      <div className="rounded-2xl border border-gray-200 p-10 text-center">
+      <div className="rounded-2xl border border-border p-10 text-center">
         <p className="text-4xl">
           {"\uD83D\uDE36\u200D\uD83C\uDF2B\uFE0F"}
         </p>
-        <p className="mt-3 text-lg font-semibold text-gray-600">
+        <p className="mt-3 text-lg font-semibold text-muted-foreground">
           No shared ranked songs
         </p>
-        <p className="mt-1 text-sm text-gray-400">
+        <p className="mt-1 text-sm text-muted-foreground/60">
           These users haven&apos;t ranked any of the same songs yet. Start
           ranking to see how your taste compares!
         </p>
@@ -45,8 +47,18 @@ export default function ComparisonCard({
         user1Name={user1Name}
         user2Name={user2Name}
       />
+      <EraIdentity
+        result={result}
+        user1Name={user1Name}
+        user2Name={user2Name}
+      />
       <AgreementsSection result={result} />
       <DisagreementsSection
+        result={result}
+        user1Name={user1Name}
+        user2Name={user2Name}
+      />
+      <VaultSection
         result={result}
         user1Name={user1Name}
         user2Name={user2Name}

@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { computeStats } from "@/lib/stats";
-import type { Song, TierEntry, UserProfile } from "@/lib/types";
+import type { TierEntry, UserProfile } from "@/lib/types";
+import { normalizeSongs } from "@/lib/types";
 import ProfileStats from "@/components/ProfileStats";
 import TierListDisplay from "@/components/TierListDisplay";
 import ProfileActions from "./ProfileActions";
@@ -56,7 +57,7 @@ export default async function UserProfilePage({ params }: Props) {
     supabase.auth.getUser(),
   ]);
 
-  const songs = (songsRes.data ?? []) as Song[];
+  const songs = normalizeSongs(songsRes.data ?? []);
   const entries = (entriesRes.data ?? []) as TierEntry[];
   const currentUser = authRes.data.user;
   const isOwner = currentUser?.id === typedProfile.id;
@@ -77,7 +78,7 @@ export default async function UserProfilePage({ params }: Props) {
         )}
         <div className="flex-1">
           <h1 className="text-2xl font-bold">{typedProfile.display_name}</h1>
-          <p className="text-sm text-gray-500">@{typedProfile.username}</p>
+          <p className="text-sm text-muted-foreground">@{typedProfile.username}</p>
         </div>
         <ProfileActions
           username={typedProfile.username}
@@ -93,13 +94,13 @@ export default async function UserProfilePage({ params }: Props) {
 
       {/* Tier list */}
       <div className="mt-6">
-        <h2 className="mb-3 text-sm font-semibold text-gray-500 uppercase tracking-wider">
+        <h2 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
           Tier List
         </h2>
         {entries.length > 0 ? (
           <TierListDisplay entries={entries} songs={songs} />
         ) : (
-          <p className="py-8 text-center text-gray-400">
+          <p className="py-8 text-center text-muted-foreground/60">
             No songs ranked yet.
           </p>
         )}

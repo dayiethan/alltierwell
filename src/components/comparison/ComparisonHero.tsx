@@ -23,7 +23,7 @@ export default function ComparisonHero({
 
   return (
     <div
-      className="relative overflow-hidden rounded-2xl border border-gray-200 p-8 text-center"
+      className="relative overflow-hidden rounded-2xl border border-border p-8 text-center"
       style={{
         background: `radial-gradient(ellipse at top, ${scoreColor}08 0%, transparent 70%)`,
       }}
@@ -36,7 +36,7 @@ export default function ComparisonHero({
             cy="60"
             r="52"
             fill="none"
-            stroke="#f3f4f6"
+            stroke="var(--muted)"
             strokeWidth="8"
           />
           <circle
@@ -57,10 +57,10 @@ export default function ComparisonHero({
         </div>
       </div>
 
-      <p className="mt-3 text-base italic text-gray-500">
+      <p className="mt-3 text-base italic text-muted-foreground">
         &ldquo;{result.flavorText}&rdquo;
       </p>
-      <p className="mt-1 text-sm text-gray-400">
+      <p className="mt-1 text-sm text-muted-foreground/60">
         across {result.sharedSongsCount} shared songs
       </p>
 
@@ -78,7 +78,7 @@ export default function ComparisonHero({
             total={result.totalSongs}
           />
         </div>
-        <p className="mt-1.5 text-[11px] text-gray-400">
+        <p className="mt-1.5 text-[11px] text-muted-foreground/60">
           songs ranked out of {result.totalSongs}
         </p>
       </div>
@@ -98,15 +98,15 @@ function CompletionBar({
   const pct = total > 0 ? Math.round((value / total) * 100) : 0;
   return (
     <div className="flex-1">
-      <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+      <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
         <span className="font-medium truncate">{name}</span>
         <span className="flex-shrink-0 ml-1">
           {value} ({pct}%)
         </span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-gray-100">
+      <div className="h-2 overflow-hidden rounded-full bg-muted">
         <div
-          className="h-full rounded-full bg-gray-600 transition-all"
+          className="h-full rounded-full bg-accent transition-all"
           style={{ width: `${pct}%` }}
         />
       </div>

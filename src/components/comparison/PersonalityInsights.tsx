@@ -29,7 +29,7 @@ export default function PersonalityInsights({
 }: PersonalityInsightsProps) {
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+      <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
         Ranking Personality
       </h3>
 
@@ -40,8 +40,8 @@ export default function PersonalityInsights({
       </div>
 
       {/* Side-by-side tier distributions */}
-      <div className="rounded-lg border border-gray-200 p-4 space-y-3">
-        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+      <div className="rounded-lg border border-border p-4 space-y-3">
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
           Tier Distribution
         </p>
         <TierDistBar
@@ -67,8 +67,8 @@ function UserCard({
   stats: UserComparisonStats;
 }) {
   return (
-    <div className="rounded-xl border border-gray-200 p-4 text-center">
-      <p className="text-xs text-gray-500 truncate">{name}</p>
+    <div className="rounded-xl border border-border p-4 text-center">
+      <p className="text-xs text-muted-foreground truncate">{name}</p>
       <p className="mt-1 text-2xl">
         {getStyleEmoji(stats.gradingStyle)}
       </p>
@@ -80,7 +80,7 @@ function UserCard({
         >
           S
         </span>
-        <span className="text-xs text-gray-400">{stats.sTierPercent}%</span>
+        <span className="text-xs text-muted-foreground/60">{stats.sTierPercent}%</span>
       </div>
     </div>
   );
@@ -98,7 +98,7 @@ function TierDistBar({
   if (total === 0) return null;
   return (
     <div>
-      <p className="text-[11px] text-gray-400 mb-1 truncate">{name}</p>
+      <p className="text-[11px] text-muted-foreground/60 mb-1 truncate">{name}</p>
       <div className="flex h-6 overflow-hidden rounded-md">
         {TIERS.map((tier) => {
           const pct = (counts[tier] / total) * 100;

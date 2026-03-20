@@ -48,6 +48,12 @@ export default function Header() {
               Compare
             </Link>
             <Link
+              href="/stats"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Stats
+            </Link>
+            <Link
               href="/settings"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
@@ -111,6 +117,13 @@ export default function Header() {
               onClick={() => setMenuOpen(false)}
             >
               Compare
+            </Link>
+            <Link
+              href="/stats"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              onClick={() => setMenuOpen(false)}
+            >
+              Stats
             </Link>
             <Link
               href="/settings"

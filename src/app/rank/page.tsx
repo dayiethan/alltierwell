@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/client";
 import type { Song, Tier } from "@/lib/types";
+import { normalizeSongs } from "@/lib/types";
 import { TIERS } from "@/lib/constants";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import TierRow from "@/components/TierRow";
@@ -41,7 +42,7 @@ export default function RankPage() {
       ]);
 
       if (songsRes.data) {
-        setSongs(songsRes.data as Song[]);
+        setSongs(normalizeSongs(songsRes.data));
       }
 
       if (entriesRes.data) {

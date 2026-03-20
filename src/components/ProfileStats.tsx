@@ -10,8 +10,8 @@ export default function ProfileStats({ stats }: ProfileStatsProps) {
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard label="Songs Ranked" value={stats.totalRanked.toString()} />
-        <StatCard label="Favorite Album" value={stats.favoriteAlbum ?? "—"} />
         <StatCard label="Favorite Era" value={stats.favoriteEra ?? "—"} />
+        <StatCard label="Archetype" value={stats.archetype} />
         <StatCard
           label="S-Tier Songs"
           value={stats.tierCounts.S.toString()}
@@ -21,7 +21,7 @@ export default function ProfileStats({ stats }: ProfileStatsProps) {
       {/* Tier distribution bar */}
       {stats.totalRanked > 0 && (
         <div>
-          <p className="mb-1.5 text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <p className="mb-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">
             Tier Distribution
           </p>
           <div className="flex h-6 overflow-hidden rounded-md">
@@ -51,8 +51,8 @@ export default function ProfileStats({ stats }: ProfileStatsProps) {
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-gray-200 px-3 py-2">
-      <p className="text-xs text-gray-500">{label}</p>
+    <div className="rounded-lg border border-border px-3 py-2">
+      <p className="text-xs text-muted-foreground">{label}</p>
       <p className="mt-0.5 text-lg font-semibold">{value}</p>
     </div>
   );

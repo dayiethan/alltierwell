@@ -7,6 +7,7 @@ export interface Song {
   album_order: number;
   track_number: number;
   is_vault: boolean;
+  tags: string[];
 }
 
 export interface UserProfile {
@@ -28,11 +29,19 @@ export interface TierEntry {
 
 export type TierListMap = Map<string, Tier>;
 
+/** Normalize songs from DB — ensures tags is always an array */
+export function normalizeSongs(raw: unknown[]): Song[] {
+  return (raw as Record<string, unknown>[]).map((s) => ({
+    ...s,
+    tags: Array.isArray(s.tags) ? s.tags : [],
+  })) as Song[];
+}
+
 export interface ProfileStats {
   totalRanked: number;
   tierCounts: Record<Tier, number>;
-  favoriteAlbum: string | null;
   favoriteEra: string | null;
+  archetype: string;
 }
 
 export interface UserComparisonStats {
@@ -41,6 +50,15 @@ export interface UserComparisonStats {
   avgTier: number;
   gradingStyle: string;
   sTierPercent: number;
+}
+
+export interface EraScore {
+  album: string;
+  shortName: string;
+  albumImage?: string;
+  albumColor: string;
+  avgTier: number;
+  count: number;
 }
 
 export interface ComparisonResult {
@@ -68,4 +86,17 @@ export interface ComparisonResult {
     score: number;
     sharedCount: number;
   }[];
+  // Batch 2: Era Identity
+  user1TopEras: EraScore[];
+  user2TopEras: EraScore[];
+  // Batch 2: Deep Cut & Vault Soulmates
+  deepCutSoulmates: { song: Song; tier: Tier }[];
+  // Batch 2: Vault Track Verdict
+  vaultVerdict: {
+    user1VaultCount: number;
+    user2VaultCount: number;
+    sharedVaultCount: number;
+    vaultCompatibility: number;
+    sharedVaultSameTier: { song: Song; tier: Tier }[];
+  };
 }

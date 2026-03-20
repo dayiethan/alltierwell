@@ -1,8 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { computeComparison } from "@/lib/comparison";
-import type { Song, TierEntry, UserProfile } from "@/lib/types";
+import type { TierEntry, UserProfile } from "@/lib/types";
+import { normalizeSongs } from "@/lib/types";
 import ComparisonCard from "@/components/ComparisonCard";
+import ComparisonShareButton from "@/components/comparison/ComparisonShareButton";
 import Link from "next/link";
 
 interface Props {
@@ -43,7 +45,7 @@ export default async function ComparisonPage({ params }: Props) {
     supabase.from("tier_entries").select("*").eq("user_id", user2.id),
   ]);
 
-  const songs = (songsRes.data ?? []) as Song[];
+  const songs = normalizeSongs(songsRes.data ?? []);
   const entries1 = (entries1Res.data ?? []) as TierEntry[];
   const entries2 = (entries2Res.data ?? []) as TierEntry[];
 
@@ -54,8 +56,8 @@ export default async function ComparisonPage({ params }: Props) {
       {/* User badges header */}
       <div className="mb-8 flex items-center justify-center gap-3 sm:gap-5">
         <UserBadge profile={user1} />
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
-          <span className="text-sm font-bold text-gray-400">vs</span>
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+          <span className="text-sm font-bold text-muted-foreground">vs</span>
         </div>
         <UserBadge profile={user2} />
       </div>
@@ -65,6 +67,11 @@ export default async function ComparisonPage({ params }: Props) {
         user1Name={user1.display_name}
         user2Name={user2.display_name}
       />
+
+      {/* Share button */}
+      <div className="mt-6 flex justify-center">
+        <ComparisonShareButton />
+      </div>
     </div>
   );
 }
@@ -73,23 +80,23 @@ function UserBadge({ profile }: { profile: UserProfile }) {
   return (
     <Link
       href={`/user/${profile.username}`}
-      className="flex items-center gap-2.5 rounded-xl border border-gray-200 px-4 py-2.5 hover:bg-gray-50 transition-colors"
+      className="flex items-center gap-2.5 rounded-xl border border-border px-4 py-2.5 hover:bg-muted transition-colors"
     >
       {profile.avatar_url ? (
         <img
           src={profile.avatar_url}
           alt={profile.display_name}
-          className="h-9 w-9 rounded-full ring-2 ring-gray-100"
+          className="h-9 w-9 rounded-full ring-2 ring-border"
           referrerPolicy="no-referrer"
         />
       ) : (
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200 text-sm font-bold text-gray-500">
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-sm font-bold text-muted-foreground">
           {profile.display_name.charAt(0).toUpperCase()}
         </div>
       )}
       <div>
         <p className="text-sm font-semibold">{profile.display_name}</p>
-        <p className="text-xs text-gray-500">@{profile.username}</p>
+        <p className="text-xs text-muted-foreground">@{profile.username}</p>
       </div>
     </Link>
   );

@@ -36,11 +36,11 @@ export default function DisagreementsSection({
 
         return (
           <div>
-            <h3 className="mb-3 text-sm font-semibold text-gray-500 uppercase tracking-wider">
+            <h3 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
               Biggest Disagreement
             </h3>
             <div
-              className="relative overflow-hidden rounded-xl border border-gray-200 p-5 text-center"
+              className="relative overflow-hidden rounded-xl border border-border p-5 text-center"
               style={{
                 background: `linear-gradient(135deg, ${albumColor}12 0%, transparent 70%)`,
               }}
@@ -69,7 +69,7 @@ export default function DisagreementsSection({
                   <p className="text-lg font-bold leading-tight">
                     {topDisagreement.song.title}
                   </p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-muted-foreground/60">
                     {topDisagreement.song.album}
                   </p>
                 </div>
@@ -77,12 +77,12 @@ export default function DisagreementsSection({
 
               <div className="mt-4 flex items-center justify-center gap-6">
                 <div className="text-center">
-                  <p className="text-[11px] text-gray-500 mb-1">{user1Name}</p>
+                  <p className="text-[11px] text-muted-foreground mb-1">{user1Name}</p>
                   <TierBadgeLarge tier={topDisagreement.user1Tier} />
                 </div>
                 <div className="flex flex-col items-center">
                   <svg
-                    className="h-5 w-5 text-gray-300"
+                    className="h-5 w-5 text-muted-foreground/40"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -96,7 +96,7 @@ export default function DisagreementsSection({
                   </svg>
                 </div>
                 <div className="text-center">
-                  <p className="text-[11px] text-gray-500 mb-1">{user2Name}</p>
+                  <p className="text-[11px] text-muted-foreground mb-1">{user2Name}</p>
                   <TierBadgeLarge tier={topDisagreement.user2Tier} />
                 </div>
               </div>
@@ -108,7 +108,7 @@ export default function DisagreementsSection({
       {/* Love/hate splits */}
       {hasLoveHate && (
         <div>
-          <h3 className="mb-3 text-sm font-semibold text-gray-500 uppercase tracking-wider">
+          <h3 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
             One Person&apos;s Treasure...
           </h3>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -143,7 +143,7 @@ export default function DisagreementsSection({
         <div>
           <button
             onClick={() => setShowMore(!showMore)}
-            className="flex items-center gap-1 text-xs font-medium text-gray-400 hover:text-gray-600 transition-colors"
+            className="flex items-center gap-1 text-xs font-medium text-muted-foreground/60 hover:text-muted-foreground transition-colors"
           >
             <svg
               className={`h-3 w-3 transition-transform ${showMore ? "rotate-90" : ""}`}
@@ -167,17 +167,17 @@ export default function DisagreementsSection({
               {remainingDisagreements.map((d) => (
                 <div
                   key={d.song.id}
-                  className="flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2"
+                  className="flex items-center justify-between rounded-lg border border-border px-3 py-2"
                 >
                   <div className="min-w-0 mr-2">
                     <span className="text-sm font-medium">{d.song.title}</span>
-                    <span className="ml-1.5 text-[10px] text-gray-400">
+                    <span className="ml-1.5 text-[10px] text-muted-foreground/60">
                       {d.song.album}
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5 flex-shrink-0">
                     <TierBadge tier={d.user1Tier} />
-                    <span className="text-[10px] text-gray-300">vs</span>
+                    <span className="text-[10px] text-muted-foreground/40">vs</span>
                     <TierBadge tier={d.user2Tier} />
                   </div>
                 </div>
@@ -220,8 +220,8 @@ function LoveHateList({
   items: { title: string; album: string; loveTier: Tier; hateTier: Tier }[];
 }) {
   return (
-    <div className="rounded-xl border border-gray-200 p-4">
-      <p className="text-xs font-medium text-gray-500 mb-3">{title}</p>
+    <div className="rounded-xl border border-border p-4">
+      <p className="text-xs font-medium text-muted-foreground mb-3">{title}</p>
       <div className="space-y-2">
         {items.map((item) => {
           const albumColor =
@@ -235,7 +235,7 @@ function LoveHateList({
               <span className="text-xs truncate flex-1">{item.title}</span>
               <div className="flex items-center gap-1 flex-shrink-0">
                 <TierBadge tier={item.loveTier} />
-                <span className="text-[10px] text-gray-300">/</span>
+                <span className="text-[10px] text-muted-foreground/40">/</span>
                 <TierBadge tier={item.hateTier} />
               </div>
             </div>

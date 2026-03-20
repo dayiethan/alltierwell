@@ -16,10 +16,10 @@ export default function AlbumAlignment({ result }: AlbumAlignmentProps) {
 
   return (
     <div>
-      <h3 className="mb-3 text-sm font-semibold text-gray-500 uppercase tracking-wider">
+      <h3 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
         Album Alignment
       </h3>
-      <div className="rounded-xl border border-gray-200 p-4 space-y-3">
+      <div className="rounded-xl border border-border p-4 space-y-3">
         {result.albumAlignment.map((a) => {
           const isBest = showLabels && a === best;
           const isWorst = showLabels && a === worst;
@@ -58,10 +58,10 @@ export default function AlbumAlignment({ result }: AlbumAlignmentProps) {
                 className={`h-7 w-7 rounded flex-shrink-0 ${albumImage ? "hidden" : ""}`}
                 style={{ backgroundColor: a.albumColor + "30" }}
               />
-              <span className="w-20 text-xs font-medium text-gray-600 truncate">
+              <span className="w-20 text-xs font-medium text-muted-foreground truncate">
                 {a.album}
               </span>
-              <div className="flex-1 h-3.5 overflow-hidden rounded-full bg-gray-100">
+              <div className="flex-1 h-3.5 overflow-hidden rounded-full bg-muted">
                 <div
                   className="h-full rounded-full transition-all"
                   style={{
@@ -71,9 +71,9 @@ export default function AlbumAlignment({ result }: AlbumAlignmentProps) {
                   }}
                 />
               </div>
-              <span className="w-20 text-right text-xs text-gray-500 flex items-center justify-end gap-1.5">
+              <span className="w-20 text-right text-xs text-muted-foreground flex items-center justify-end gap-1.5">
                 <span className="font-medium">{a.score}%</span>
-                <span className="text-gray-400">({a.sharedCount})</span>
+                <span className="text-muted-foreground/60">({a.sharedCount})</span>
                 {isBest && (
                   <span className="text-[8px] font-bold text-green-600 bg-green-50 px-1 rounded">
                     BEST

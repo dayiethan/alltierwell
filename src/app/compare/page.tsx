@@ -66,7 +66,7 @@ export default function ComparePage() {
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-gray-400">Loading...</p>
+        <p className="text-muted-foreground">Loading...</p>
       </div>
     );
   }
@@ -76,7 +76,7 @@ export default function ComparePage() {
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold">Compare Tier Lists</h1>
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm text-muted-foreground">
             Enter a username or paste a profile URL to see how your taste
             compares.
           </p>
@@ -84,7 +84,7 @@ export default function ComparePage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
               @
             </span>
             <input
@@ -95,14 +95,14 @@ export default function ComparePage() {
                 setError(null);
               }}
               placeholder="username or profile URL"
-              className="w-full rounded-md border border-gray-300 py-2.5 pl-8 pr-4 text-sm focus:border-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-500"
+              className="w-full rounded-md border border-border bg-card py-2.5 pl-8 pr-4 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
               autoFocus
             />
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
           <button
             type="submit"
-            className="w-full rounded-md bg-foreground px-4 py-2.5 text-sm font-medium text-background hover:opacity-90"
+            className="w-full rounded-md bg-accent px-4 py-2.5 text-sm font-medium text-accent-foreground hover:opacity-90"
           >
             Compare
           </button>

@@ -4,6 +4,7 @@ import type {
   TierEntry,
   ComparisonResult,
   UserComparisonStats,
+  EraScore,
 } from "@/lib/types";
 import {
   TIER_ORDER,
@@ -35,6 +36,42 @@ function computeUserStats(entries: TierEntry[]): UserComparisonStats {
     gradingStyle: getGradingStyle(avgTier),
     sTierPercent,
   };
+}
+
+function computeEraIdentity(
+  entries: TierEntry[],
+  songs: Song[]
+): EraScore[] {
+  const songMap = new Map(songs.map((s) => [s.id, s]));
+  const albumStats: Record<string, { totalTier: number; count: number }> = {};
+
+  for (const entry of entries) {
+    const song = songMap.get(entry.song_id);
+    if (!song) continue;
+    if (!albumStats[song.album]) {
+      albumStats[song.album] = { totalTier: 0, count: 0 };
+    }
+    albumStats[song.album].totalTier += TIER_ORDER[entry.tier as Tier];
+    albumStats[song.album].count++;
+  }
+
+  return Object.entries(albumStats)
+    .filter(([, stats]) => stats.count >= 3)
+    .map(([album, stats]) => {
+      const albumData = ALBUMS.find((a) => a.name === album) as
+        | { name: string; color: string; image: string }
+        | undefined;
+      return {
+        album,
+        shortName: ALBUM_SHORT_NAMES[album] ?? album,
+        albumImage: albumData?.image,
+        albumColor: albumData?.color ?? "#888",
+        avgTier: stats.totalTier / stats.count,
+        count: stats.count,
+      };
+    })
+    .sort((a, b) => a.avgTier - b.avgTier)
+    .slice(0, 3);
 }
 
 export function computeComparison(
@@ -70,6 +107,16 @@ export function computeComparison(
       biggestDisagreements: [],
       loveHateSplits: { user1Loves: [], user2Loves: [] },
       albumAlignment: [],
+      user1TopEras: computeEraIdentity(user1Entries, songs),
+      user2TopEras: computeEraIdentity(user2Entries, songs),
+      deepCutSoulmates: [],
+      vaultVerdict: {
+        user1VaultCount: 0,
+        user2VaultCount: 0,
+        sharedVaultCount: 0,
+        vaultCompatibility: 0,
+        sharedVaultSameTier: [],
+      },
     };
   }
 
@@ -157,6 +204,58 @@ export function computeComparison(
     })
     .sort((a, b) => b.score - a.score);
 
+  // Batch 2: Era Identity
+  const user1TopEras = computeEraIdentity(user1Entries, songs);
+  const user2TopEras = computeEraIdentity(user2Entries, songs);
+
+  // Batch 2: Deep Cut & Vault Soulmates
+  const deepCutSoulmates: { song: Song; tier: Tier }[] = [];
+  let vaultTotalDistance = 0;
+  let vaultSharedCount = 0;
+  const sharedVaultSameTier: { song: Song; tier: Tier }[] = [];
+
+  for (const songId of sharedSongIds) {
+    const song = songMap.get(songId);
+    if (!song) continue;
+
+    const tier1 = user1Map.get(songId)!;
+    const tier2 = user2Map.get(songId)!;
+    const distance = Math.abs(TIER_ORDER[tier1] - TIER_ORDER[tier2]);
+
+    // Deep cut: vault track or track_number > 13
+    const isDeepCut = song.is_vault || song.track_number > 13;
+    if (isDeepCut && distance === 0) {
+      deepCutSoulmates.push({ song, tier: tier1 });
+    }
+
+    // Vault-specific stats
+    if (song.is_vault) {
+      vaultSharedCount++;
+      vaultTotalDistance += distance;
+      if (distance === 0) {
+        sharedVaultSameTier.push({ song, tier: tier1 });
+      }
+    }
+  }
+
+  // Sort deep cuts: S-tier agreements first, then by tier
+  deepCutSoulmates.sort((a, b) => TIER_ORDER[a.tier] - TIER_ORDER[b.tier]);
+
+  const user1VaultCount = user1Entries.filter((e) => {
+    const song = songMap.get(e.song_id);
+    return song?.is_vault;
+  }).length;
+
+  const user2VaultCount = user2Entries.filter((e) => {
+    const song = songMap.get(e.song_id);
+    return song?.is_vault;
+  }).length;
+
+  const vaultCompatibility =
+    vaultSharedCount > 0
+      ? Math.round(100 * (1 - vaultTotalDistance / vaultSharedCount / 5))
+      : 0;
+
   return {
     compatibilityScore,
     flavorText: getFlavorText(compatibilityScore),
@@ -172,5 +271,15 @@ export function computeComparison(
       user2Loves: user2Loves.slice(0, 5),
     },
     albumAlignment,
+    user1TopEras,
+    user2TopEras,
+    deepCutSoulmates,
+    vaultVerdict: {
+      user1VaultCount,
+      user2VaultCount,
+      sharedVaultCount: vaultSharedCount,
+      vaultCompatibility,
+      sharedVaultSameTier,
+    },
   };
 }

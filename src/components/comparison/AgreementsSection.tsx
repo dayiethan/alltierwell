@@ -19,11 +19,11 @@ export default function AgreementsSection({ result }: AgreementsSectionProps) {
       {/* Shared S-Tier spotlight */}
       {sharedSTier.length > 0 && (
         <div>
-          <h3 className="mb-3 text-sm font-semibold text-gray-500 uppercase tracking-wider">
+          <h3 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
             Shared Masterpieces
           </h3>
           <div
-            className="rounded-xl border border-gray-200 p-5"
+            className="rounded-xl border border-border p-5"
             style={{
               background: `linear-gradient(135deg, ${TIER_COLORS.S}10 0%, ${TIER_COLORS.A}08 100%)`,
             }}
@@ -39,17 +39,17 @@ export default function AgreementsSection({ result }: AgreementsSectionProps) {
 
       {/* Same-tier summary */}
       <div>
-        <h3 className="mb-3 text-sm font-semibold text-gray-500 uppercase tracking-wider">
+        <h3 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
           Same Tier
         </h3>
-        <div className="rounded-xl border border-gray-200 p-4">
+        <div className="rounded-xl border border-border p-4">
           {/* Visual pill summary */}
           <div className="flex flex-wrap gap-2">
             {TIERS.filter((t) => result.sameTierSongs[t].length > 0).map(
               (tier) => (
                 <span
                   key={tier}
-                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium text-gray-700"
+                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium"
                   style={{ backgroundColor: `${TIER_COLORS[tier]}30` }}
                 >
                   <span
@@ -62,7 +62,7 @@ export default function AgreementsSection({ result }: AgreementsSectionProps) {
                 </span>
               )
             )}
-            <span className="inline-flex items-center rounded-full px-3 py-1 text-xs text-gray-500 bg-gray-100">
+            <span className="inline-flex items-center rounded-full px-3 py-1 text-xs text-muted-foreground bg-muted">
               {result.sameTierTotal} total
             </span>
           </div>
@@ -72,7 +72,7 @@ export default function AgreementsSection({ result }: AgreementsSectionProps) {
             <>
               <button
                 onClick={() => setExpanded(!expanded)}
-                className="mt-3 flex items-center gap-1 text-xs font-medium text-gray-400 hover:text-gray-600 transition-colors"
+                className="mt-3 flex items-center gap-1 text-xs font-medium text-muted-foreground/60 hover:text-muted-foreground transition-colors"
               >
                 <svg
                   className={`h-3 w-3 transition-transform ${expanded ? "rotate-90" : ""}`}
@@ -90,14 +90,14 @@ export default function AgreementsSection({ result }: AgreementsSectionProps) {
                 {expanded ? "Hide details" : "Show all songs"}
               </button>
               {expanded && (
-                <div className="mt-3 space-y-3 border-t border-gray-100 pt-3">
+                <div className="mt-3 space-y-3 border-t border-border pt-3">
                   {TIERS.filter(
                     (t) => t !== "S" && result.sameTierSongs[t].length > 0
                   ).map((tier) => (
                     <div key={tier}>
                       <div className="flex items-center gap-2 mb-1.5">
                         <TierBadge tier={tier} />
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-muted-foreground">
                           {result.sameTierSongs[tier].length} song
                           {result.sameTierSongs[tier].length !== 1 && "s"}
                         </span>
@@ -125,7 +125,7 @@ function SongCard({ song }: { song: Song }) {
   const albumImage = album?.image;
 
   return (
-    <div className="flex items-center gap-3 rounded-lg bg-white/60 px-3 py-2.5 border border-gray-100">
+    <div className="flex items-center gap-3 rounded-lg bg-card/60 px-3 py-2.5 border border-border">
       {albumImage ? (
         <img
           src={albumImage}
@@ -143,7 +143,7 @@ function SongCard({ song }: { song: Song }) {
       />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium truncate">{song.title}</p>
-        <p className="text-[11px] text-gray-400 truncate">{song.album}</p>
+        <p className="text-[11px] text-muted-foreground/60 truncate">{song.album}</p>
       </div>
       <span
         className="inline-flex h-6 w-6 items-center justify-center rounded text-[10px] font-bold text-gray-800 flex-shrink-0"
@@ -171,7 +171,7 @@ function SongTag({ song, tier }: { song: Song; tier: Tier }) {
     ALBUMS.find((a) => a.name === song.album)?.color ?? "#888";
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-md border border-gray-100 px-2 py-0.5 text-xs"
+      className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-0.5 text-xs"
       style={{ backgroundColor: `${TIER_COLORS[tier]}15` }}
     >
       <span
