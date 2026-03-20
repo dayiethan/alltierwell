@@ -37,6 +37,7 @@ export const ALBUMS = [
   { name: "Midnights", order: 10, color: "#191970", image: "/albums/midnights.png" },
   { name: "The Tortured Poets Department", order: 11, color: "#F5F5DC", image: "/albums/ttpd.png" },
   { name: "The Life of a Showgirl", order: 12, color: "#E8333A", image: "/albums/tloas.png" },
+  { name: "Non-Album", order: 999, color: "#9CA3AF", image: "/albums/non-album.png" },
 ] as const;
 
 export const ALBUM_SHORT_NAMES: Record<string, string> = {
@@ -56,6 +57,7 @@ export const ALBUM_SHORT_NAMES: Record<string, string> = {
   Midnights: "Midnights",
   "The Tortured Poets Department": "TTPD",
   "The Life of a Showgirl": "Showgirl",
+  "Non-Album": "Non-Album",
 };
 
 export const COMPATIBILITY_FLAVOR: { min: number; text: string }[] = [
