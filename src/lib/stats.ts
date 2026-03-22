@@ -1,12 +1,13 @@
 import type { Song, Tier, ProfileStats, TierEntry } from "@/lib/types";
-import { ALBUM_SHORT_NAMES } from "@/lib/constants";
+import { ALBUM_SHORT_NAMES, TIER_ORDER } from "@/lib/constants";
 
 // ──────────────────────────────────────────────
 // Song tags (populate via Supabase on the songs table)
 //
 // Available tags:
 //   heartbreak, love, angry, nostalgic, melancholy,
-//   empowerment, storytelling, upbeat, ballad
+//   empowerment, storytelling, upbeat, ballad,
+//   yearning, anxious, playful, introspective
 // ──────────────────────────────────────────────
 
 // Album era groups for fallback classification
@@ -37,13 +38,13 @@ const ALBUM_ARCHETYPE_MAP: Record<string, string> = {
 
 // Tags that are "boosted" by each album group — used as tiebreaker
 const ERA_TAG_AFFINITY: Record<string, string[]> = {
-  country: ["nostalgic", "love", "storytelling"],
-  romantic: ["heartbreak", "love", "storytelling"],
-  pop: ["upbeat", "empowerment", "love"],
-  dark: ["angry", "empowerment", "melancholy"],
-  indie: ["melancholy", "storytelling", "nostalgic"],
-  poetry: ["heartbreak", "melancholy", "storytelling"],
-  showgirl: ["upbeat", "empowerment", "love"],
+  country: ["nostalgic", "love", "storytelling", "playful"],
+  romantic: ["heartbreak", "love", "storytelling", "yearning"],
+  pop: ["upbeat", "empowerment", "love", "playful"],
+  dark: ["angry", "empowerment", "melancholy", "anxious"],
+  indie: ["melancholy", "storytelling", "nostalgic", "introspective"],
+  poetry: ["heartbreak", "melancholy", "storytelling", "yearning"],
+  showgirl: ["upbeat", "empowerment", "love", "playful"],
 };
 
 // ──────────────────────────────────────────────
@@ -60,6 +61,13 @@ const COMBO_RULES: [string, string, string][] = [
   ["nostalgic", "melancholy", "The Time Traveler"],
   ["heartbreak", "ballad", "The Balladeer"],
   ["storytelling", "nostalgic", "The Storyteller"],
+  ["yearning", "love", "The Hopeless Romantic"],
+  ["yearning", "heartbreak", "The Piner"],
+  ["playful", "upbeat", "The Jester"],
+  ["anxious", "love", "The Overthinker"],
+  ["anxious", "heartbreak", "The Spiral"],
+  ["introspective", "melancholy", "The Philosopher"],
+  ["introspective", "storytelling", "The Narrator"],
 ];
 
 // ──────────────────────────────────────────────
@@ -76,6 +84,10 @@ const TAG_ARCHETYPE_MAP: Record<string, string> = {
   storytelling: "The Storyteller",
   upbeat: "The Party Starter",
   ballad: "The Balladeer",
+  yearning: "The Piner",
+  playful: "The Jester",
+  anxious: "The Overthinker",
+  introspective: "The Philosopher",
 };
 
 function getAlbumGroup(entries: TierEntry[], songMap: Map<string, Song>): string | null {
@@ -104,7 +116,7 @@ function getAlbumGroup(entries: TierEntry[], songMap: Map<string, Song>): string
   return topGroup;
 }
 
-function computeArchetype(entries: TierEntry[], songs: Song[]): string {
+export function computeArchetype(entries: TierEntry[], songs: Song[]): string {
   if (entries.length < 10) return "The Swiftie";
 
   const songMap = new Map(songs.map((s) => [s.id, s]));
@@ -186,6 +198,11 @@ function computeArchetype(entries: TierEntry[], songs: Song[]): string {
   return "The Swiftie";
 }
 
+/** Bayesian smoothing constant — with fewer ranked songs the score
+ *  gravitates toward the user's global average, preventing eras with
+ *  only a couple of ranked songs from dominating. */
+const ERA_SMOOTHING = 5;
+
 export function computeStats(
   entries: TierEntry[],
   songs: Song[]
@@ -199,24 +216,37 @@ export function computeStats(
     F: 0,
   };
 
-  const albumHighTierCounts: Record<string, number> = {};
   const songMap = new Map(songs.map((s) => [s.id, s]));
+  const albumStats: Record<string, { totalTier: number; count: number }> = {};
+  let globalTotalTier = 0;
 
   for (const entry of entries) {
     tierCounts[entry.tier]++;
+    globalTotalTier += TIER_ORDER[entry.tier as Tier];
 
     const song = songMap.get(entry.song_id);
-    if (song && (entry.tier === "S" || entry.tier === "A")) {
-      albumHighTierCounts[song.album] =
-        (albumHighTierCounts[song.album] ?? 0) + 1;
+    if (song) {
+      if (!albumStats[song.album]) {
+        albumStats[song.album] = { totalTier: 0, count: 0 };
+      }
+      albumStats[song.album].totalTier += TIER_ORDER[entry.tier as Tier];
+      albumStats[song.album].count++;
     }
   }
 
+  const globalAvg = entries.length > 0 ? globalTotalTier / entries.length : 2.5;
+
+  // Find favorite era using Bayesian-adjusted average tier (lower = better)
   let favoriteAlbum: string | null = null;
-  let maxCount = 0;
-  for (const [album, count] of Object.entries(albumHighTierCounts)) {
-    if (count > maxCount) {
-      maxCount = count;
+  let bestAdjusted = Infinity;
+  for (const [album, stats] of Object.entries(albumStats)) {
+    if (stats.count < 3) continue;
+    const rawAvg = stats.totalTier / stats.count;
+    const adjustedAvg =
+      (stats.count * rawAvg + ERA_SMOOTHING * globalAvg) /
+      (stats.count + ERA_SMOOTHING);
+    if (adjustedAvg < bestAdjusted) {
+      bestAdjusted = adjustedAvg;
       favoriteAlbum = album;
     }
   }

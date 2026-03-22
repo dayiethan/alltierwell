@@ -28,6 +28,15 @@ export async function generateMetadata({ params }: Props) {
   return {
     title: `${profile.display_name} (@${profile.username}) — All Tier Well`,
     description: `Check out ${profile.display_name}'s Taylor Swift tier list on All Tier Well.`,
+    openGraph: {
+      images: [
+        {
+          url: `/api/og/profile?username=${encodeURIComponent(profile.username)}`,
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
   };
 }
 

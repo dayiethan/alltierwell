@@ -75,7 +75,7 @@ INSERT INTO songs (title, album, album_order, track_number, is_vault) VALUES
 ('All Too Well', 'Red', 4, 5, false),
 ('22', 'Red', 4, 6, false),
 ('I Almost Do', 'Red', 4, 7, false),
-('We Are Never Getting Back Together', 'Red', 4, 8, false),
+('We Are Never Ever Getting Back Together', 'Red', 4, 8, false),
 ('Stay Stay Stay', 'Red', 4, 9, false),
 ('The Last Time', 'Red', 4, 10, false),
 ('Holy Ground', 'Red', 4, 11, false),

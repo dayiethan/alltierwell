@@ -5,6 +5,7 @@ import AgreementsSection from "./comparison/AgreementsSection";
 import DisagreementsSection from "./comparison/DisagreementsSection";
 import AlbumAlignment from "./comparison/AlbumAlignment";
 import EraIdentity from "./comparison/EraIdentity";
+import EraRadarChart from "./comparison/EraRadarChart";
 import VaultSection from "./comparison/VaultSection";
 
 interface ComparisonCardProps {
@@ -49,6 +50,20 @@ export default function ComparisonCard({
       />
       <EraIdentity
         result={result}
+        user1Name={user1Name}
+        user2Name={user2Name}
+      />
+      <EraRadarChart
+        user1TopEras={result.user1TopEras.map((e) => ({
+          album: e.album,
+          avgScore: e.avgTier,
+          count: e.count,
+        }))}
+        user2TopEras={result.user2TopEras.map((e) => ({
+          album: e.album,
+          avgScore: e.avgTier,
+          count: e.count,
+        }))}
         user1Name={user1Name}
         user2Name={user2Name}
       />

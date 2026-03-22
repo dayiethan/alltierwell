@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import CardPreviewModal from "@/components/ui/CardPreviewModal";
 
 interface ProfileActionsProps {
   username: string;
@@ -19,6 +20,7 @@ export default function ProfileActions({
   targetUserId,
 }: ProfileActionsProps) {
   const [copied, setCopied] = useState<"profile" | "compare" | null>(null);
+  const [showCard, setShowCard] = useState(false);
   const router = useRouter();
 
   const logEvent = (eventType: string) => {
@@ -53,48 +55,65 @@ export default function ProfileActions({
   };
 
   return (
-    <div className="flex flex-wrap gap-2">
-      <button
-        onClick={() => handleCopy("profile")}
-        className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
-      >
-        {copied === "profile" ? "Copied!" : "Share Profile"}
-      </button>
-
-      <button
-        onClick={() => handleCopy("compare")}
-        className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
-      >
-        {copied === "compare" ? "Copied!" : "Compare With Me"}
-      </button>
-
-      {isOwner && (
-        <Link
-          href="/rank"
+    <>
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => handleCopy("profile")}
           className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
         >
-          Edit
-        </Link>
-      )}
-
-      {isOwner && (
-        <button
-          onClick={handleSignOut}
-          className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50 hover:border-red-200"
-        >
-          Sign Out
+          {copied === "profile" ? "Copied!" : "Share Profile"}
         </button>
-      )}
 
-      {!isOwner && currentUserId && (
-        <Link
-          href={`/compare/${username}`}
-          onClick={() => logEvent("compare_button_click")}
-          className="rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-accent-foreground hover:opacity-90"
+        <button
+          onClick={() => handleCopy("compare")}
+          className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
         >
-          Compare
-        </Link>
+          {copied === "compare" ? "Copied!" : "Compare With Me"}
+        </button>
+
+        <button
+          onClick={() => setShowCard(true)}
+          className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
+        >
+          Share Card
+        </button>
+
+        {isOwner && (
+          <Link
+            href="/rank"
+            className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
+          >
+            Edit
+          </Link>
+        )}
+
+        {isOwner && (
+          <button
+            onClick={handleSignOut}
+            className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50 hover:border-red-200"
+          >
+            Sign Out
+          </button>
+        )}
+
+        {!isOwner && currentUserId && (
+          <Link
+            href={`/compare/${username}`}
+            onClick={() => logEvent("compare_button_click")}
+            className="rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-accent-foreground hover:opacity-90"
+          >
+            Compare
+          </Link>
+        )}
+      </div>
+
+      {showCard && (
+        <CardPreviewModal
+          imageUrl={`/api/og/profile?username=${username}`}
+          downloadName={`${username}-alltierwell.png`}
+          onClose={() => setShowCard(false)}
+        />
       )}
-    </div>
+    </>
   );
 }

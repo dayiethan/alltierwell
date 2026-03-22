@@ -38,6 +38,11 @@ function computeUserStats(entries: TierEntry[]): UserComparisonStats {
   };
 }
 
+/** Bayesian smoothing constant — with fewer ranked songs the score
+ *  gravitates toward the user's global average, preventing eras with
+ *  only a couple of ranked songs from dominating. */
+const ERA_SMOOTHING = 5;
+
 function computeEraIdentity(
   entries: TierEntry[],
   songs: Song[]
@@ -45,7 +50,10 @@ function computeEraIdentity(
   const songMap = new Map(songs.map((s) => [s.id, s]));
   const albumStats: Record<string, { totalTier: number; count: number }> = {};
 
+  // Global average tier across all ranked songs (Bayesian prior)
+  let globalTotalTier = 0;
   for (const entry of entries) {
+    globalTotalTier += TIER_ORDER[entry.tier as Tier];
     const song = songMap.get(entry.song_id);
     if (!song) continue;
     if (!albumStats[song.album]) {
@@ -55,18 +63,25 @@ function computeEraIdentity(
     albumStats[song.album].count++;
   }
 
+  const globalAvg = entries.length > 0 ? globalTotalTier / entries.length : 2.5;
+
   return Object.entries(albumStats)
     .filter(([, stats]) => stats.count >= 3)
     .map(([album, stats]) => {
       const albumData = ALBUMS.find((a) => a.name === album) as
         | { name: string; color: string; image: string }
         | undefined;
+      const rawAvg = stats.totalTier / stats.count;
+      // Bayesian average: pulls toward globalAvg when count is low
+      const adjustedAvg =
+        (stats.count * rawAvg + ERA_SMOOTHING * globalAvg) /
+        (stats.count + ERA_SMOOTHING);
       return {
         album,
         shortName: ALBUM_SHORT_NAMES[album] ?? album,
         albumImage: albumData?.image,
         albumColor: albumData?.color ?? "#888",
-        avgTier: stats.totalTier / stats.count,
+        avgTier: adjustedAvg,
         count: stats.count,
       };
     })

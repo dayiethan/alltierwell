@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { computeComparison } from "@/lib/comparison";
+import { computeArchetype } from "@/lib/stats";
 import type { TierEntry, UserProfile } from "@/lib/types";
 import { normalizeSongs } from "@/lib/types";
 import ComparisonCard from "@/components/ComparisonCard";
@@ -16,6 +17,15 @@ export async function generateMetadata({ params }: Props) {
   return {
     title: `@${username1} vs @${username2} — All Tier Well`,
     description: `Compare Taylor Swift tier lists between @${username1} and @${username2}.`,
+    openGraph: {
+      images: [
+        {
+          url: `/api/og/compare?u1=${encodeURIComponent(username1)}&u2=${encodeURIComponent(username2)}`,
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
   };
 }
 
@@ -50,6 +60,8 @@ export default async function ComparisonPage({ params }: Props) {
   const entries2 = (entries2Res.data ?? []) as TierEntry[];
 
   const result = computeComparison(entries1, entries2, songs);
+  const user1Archetype = computeArchetype(entries1, songs);
+  const user2Archetype = computeArchetype(entries2, songs);
 
   // Log this comparison (fire-and-forget, don't block render)
   supabase.from("comparison_log").insert({
@@ -61,11 +73,11 @@ export default async function ComparisonPage({ params }: Props) {
     <div className="py-8">
       {/* User badges header */}
       <div className="mb-8 flex items-center justify-center gap-3 sm:gap-5">
-        <UserBadge profile={user1} />
+        <UserBadge profile={user1} archetype={user1Archetype} />
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
           <span className="text-sm font-bold text-muted-foreground">vs</span>
         </div>
-        <UserBadge profile={user2} />
+        <UserBadge profile={user2} archetype={user2Archetype} />
       </div>
 
       <ComparisonCard
@@ -82,7 +94,7 @@ export default async function ComparisonPage({ params }: Props) {
   );
 }
 
-function UserBadge({ profile }: { profile: UserProfile }) {
+function UserBadge({ profile, archetype }: { profile: UserProfile; archetype: string }) {
   return (
     <Link
       href={`/user/${profile.username}`}
@@ -103,6 +115,7 @@ function UserBadge({ profile }: { profile: UserProfile }) {
       <div>
         <p className="text-sm font-semibold">{profile.display_name}</p>
         <p className="text-xs text-muted-foreground">@{profile.username}</p>
+        <p className="text-xs text-accent">{archetype}</p>
       </div>
     </Link>
   );

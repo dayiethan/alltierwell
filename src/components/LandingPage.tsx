@@ -2,8 +2,9 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { ALBUMS, TIERS, TIER_COLORS } from "@/lib/constants";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useWatermark } from "./ThemeProvider";
+import Link from "next/link";
 
 const UNIQUE_ALBUMS = ALBUMS.filter(
   (a, i, arr) => arr.findIndex((b) => b.order === a.order) === i
@@ -51,8 +52,15 @@ interface LandingPageProps {
 export default function LandingPage({ floatingImages }: LandingPageProps) {
   const supabase = createClient();
   const canvasRef = useRef<HTMLDivElement>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
   useWatermark(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsLoggedIn(!!user);
+    });
+  }, [supabase]);
 
   const handleSignIn = async () => {
     await supabase.auth.signInWithOAuth({
@@ -169,12 +177,23 @@ export default function LandingPage({ floatingImages }: LandingPageProps) {
             Rank every Taylor Swift song. Share your taste. See how you compare.
           </p>
 
-          <button
-            onClick={handleSignIn}
-            className="mt-10 rounded-xl bg-accent px-8 py-3.5 text-base font-semibold text-accent-foreground shadow-lg hover:opacity-90 transition-opacity"
-          >
-            Sign in with Google
-          </button>
+          {isLoggedIn === null ? (
+            <div className="mt-10 h-[52px]" />
+          ) : isLoggedIn ? (
+            <Link
+              href="/rank"
+              className="mt-10 inline-block rounded-xl bg-accent px-8 py-3.5 text-base font-semibold text-accent-foreground shadow-lg hover:opacity-90 transition-opacity"
+            >
+              Go to My Tier List
+            </Link>
+          ) : (
+            <button
+              onClick={handleSignIn}
+              className="mt-10 rounded-xl bg-accent px-8 py-3.5 text-base font-semibold text-accent-foreground shadow-lg hover:opacity-90 transition-opacity"
+            >
+              Sign in with Google
+            </button>
+          )}
         </div>
 
         {/* Scroll hint */}
