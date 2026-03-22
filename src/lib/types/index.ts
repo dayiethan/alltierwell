@@ -82,9 +82,13 @@ export interface ComparisonResult {
   };
   albumAlignment: {
     album: string;
+    fullName: string;
     albumColor: string;
+    albumImage?: string;
     score: number;
     sharedCount: number;
+    user1AvgTier: number;
+    user2AvgTier: number;
   }[];
   // Batch 2: Era Identity
   user1TopEras: EraScore[];
@@ -99,4 +103,7 @@ export interface ComparisonResult {
     vaultCompatibility: number;
     sharedVaultSameTier: { song: Song; tier: Tier }[];
   };
+  // Batch 3: Songs Only You Ranked (ranking gaps / implicit recommendations)
+  onlyUser1Ranked: { song: Song; tier: Tier }[];
+  onlyUser2Ranked: { song: Song; tier: Tier }[];
 }

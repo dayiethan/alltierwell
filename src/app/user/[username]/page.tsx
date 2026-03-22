@@ -6,6 +6,7 @@ import { normalizeSongs } from "@/lib/types";
 import ProfileStats from "@/components/ProfileStats";
 import TierListDisplay from "@/components/TierListDisplay";
 import ProfileActions from "./ProfileActions";
+import ProfileTheme from "./ProfileTheme";
 
 interface Props {
   params: Promise<{ username: string }>;
@@ -84,6 +85,7 @@ export default async function UserProfilePage({ params }: Props) {
 
   return (
     <div className="py-8">
+      <ProfileTheme themeEra={typedProfile.theme_era} />
       {/* Profile header */}
       <div className="flex items-start gap-4">
         {typedProfile.avatar_url && (

@@ -132,6 +132,8 @@ export function computeComparison(
         vaultCompatibility: 0,
         sharedVaultSameTier: [],
       },
+      onlyUser1Ranked: [],
+      onlyUser2Ranked: [],
     };
   }
 
@@ -151,7 +153,7 @@ export function computeComparison(
   const user1Loves: { song: Song; user1Tier: Tier; user2Tier: Tier }[] = [];
   const user2Loves: { song: Song; user1Tier: Tier; user2Tier: Tier }[] = [];
 
-  const albumStats: Record<string, { totalDistance: number; count: number }> = {};
+  const albumStats: Record<string, { totalDistance: number; count: number; user1TierTotal: number; user2TierTotal: number }> = {};
 
   for (const songId of sharedSongIds) {
     const tier1 = user1Map.get(songId)!;
@@ -183,10 +185,12 @@ export function computeComparison(
 
     // Album alignment
     if (!albumStats[song.album]) {
-      albumStats[song.album] = { totalDistance: 0, count: 0 };
+      albumStats[song.album] = { totalDistance: 0, count: 0, user1TierTotal: 0, user2TierTotal: 0 };
     }
     albumStats[song.album].totalDistance += distance;
     albumStats[song.album].count++;
+    albumStats[song.album].user1TierTotal += TIER_ORDER[tier1];
+    albumStats[song.album].user2TierTotal += TIER_ORDER[tier2];
   }
 
   const avgDistance = totalDistance / sharedSongIds.length;
@@ -208,13 +212,17 @@ export function computeComparison(
   );
 
   const albumAlignment = Object.entries(albumStats)
-    .map(([album, { totalDistance: dist, count }]) => {
+    .map(([album, { totalDistance: dist, count, user1TierTotal, user2TierTotal }]) => {
       const albumData = ALBUMS.find((a) => a.name === album);
       return {
         album: ALBUM_SHORT_NAMES[album] ?? album,
+        fullName: album,
         albumColor: albumData?.color ?? "#888",
+        albumImage: albumData?.image,
         score: Math.round(100 * (1 - dist / count / 5)),
         sharedCount: count,
+        user1AvgTier: user1TierTotal / count,
+        user2AvgTier: user2TierTotal / count,
       };
     })
     .sort((a, b) => b.score - a.score);
@@ -271,6 +279,32 @@ export function computeComparison(
       ? Math.round(100 * (1 - vaultTotalDistance / vaultSharedCount / 5))
       : 0;
 
+  // Batch 3: Songs Only One User Ranked (ranking gaps)
+  // Focus on S and F tier songs — the most interesting extremes
+  const interestingTiers = new Set<Tier>(["S", "F"]);
+
+  const onlyUser1Ranked: { song: Song; tier: Tier }[] = [];
+  for (const entry of user1Entries) {
+    if (!user2Map.has(entry.song_id) && interestingTiers.has(entry.tier as Tier)) {
+      const song = songMap.get(entry.song_id);
+      if (song) onlyUser1Ranked.push({ song, tier: entry.tier as Tier });
+    }
+  }
+
+  const onlyUser2Ranked: { song: Song; tier: Tier }[] = [];
+  for (const entry of user2Entries) {
+    if (!user1Map.has(entry.song_id) && interestingTiers.has(entry.tier as Tier)) {
+      const song = songMap.get(entry.song_id);
+      if (song) onlyUser2Ranked.push({ song, tier: entry.tier as Tier });
+    }
+  }
+
+  // Sort: S tier first (TIER_ORDER S=0), then F (TIER_ORDER F=5). Limit to 5 each.
+  const sortByTier = (a: { tier: Tier }, b: { tier: Tier }) =>
+    TIER_ORDER[a.tier] - TIER_ORDER[b.tier];
+  onlyUser1Ranked.sort(sortByTier);
+  onlyUser2Ranked.sort(sortByTier);
+
   return {
     compatibilityScore,
     flavorText: getFlavorText(compatibilityScore),
@@ -296,5 +330,7 @@ export function computeComparison(
       vaultCompatibility,
       sharedVaultSameTier,
     },
+    onlyUser1Ranked: onlyUser1Ranked.slice(0, 5),
+    onlyUser2Ranked: onlyUser2Ranked.slice(0, 5),
   };
 }

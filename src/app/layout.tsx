@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
 import {
   Lora,
   Quicksand,
@@ -7,14 +7,15 @@ import {
   Playfair_Display,
   Oswald,
   DM_Sans,
+  Space_Grotesk,
 } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import Header from "@/components/Header";
 import ThemeProvider from "@/components/ThemeProvider";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
   subsets: ["latin"],
 });
 
@@ -68,7 +69,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${lora.variable} ${quicksand.variable} ${specialElite.variable} ${playfairDisplay.variable} ${oswald.variable} ${dmSans.variable} antialiased`}
+        className={`${spaceGrotesk.variable} ${geistMono.variable} ${lora.variable} ${quicksand.variable} ${specialElite.variable} ${playfairDisplay.variable} ${oswald.variable} ${dmSans.variable} antialiased`}
+        style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
       >
         <ThemeProvider>
           <Header />
