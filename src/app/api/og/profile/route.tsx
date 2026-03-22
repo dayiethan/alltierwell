@@ -1,11 +1,11 @@
 import { ImageResponse } from "@vercel/og";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
 import { computeStats } from "@/lib/stats";
 import { normalizeSongs } from "@/lib/types";
 import type { TierEntry } from "@/lib/types";
 import { TIER_COLORS, TIERS } from "@/lib/constants";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 
 export async function GET(request: Request) {
   try {
@@ -16,7 +16,10 @@ export async function GET(request: Request) {
     return new Response("Missing username", { status: 400 });
   }
 
-  const supabase = await createClient();
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  );
 
   const { data: profile } = await supabase
     .from("users")

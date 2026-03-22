@@ -1,12 +1,12 @@
 import { ImageResponse } from "@vercel/og";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
 import { computeComparison } from "@/lib/comparison";
 import { normalizeSongs } from "@/lib/types";
 import type { TierEntry, UserProfile } from "@/lib/types";
 import { getFlavorText, getDisagreementLabel } from "@/lib/constants";
 import { computeArchetype } from "@/lib/stats";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 
 export async function GET(request: Request) {
   try {
@@ -18,7 +18,10 @@ export async function GET(request: Request) {
     return new Response("Missing u1 or u2 params", { status: 400 });
   }
 
-  const supabase = await createClient();
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  );
 
   const [profile1Res, profile2Res] = await Promise.all([
     supabase
