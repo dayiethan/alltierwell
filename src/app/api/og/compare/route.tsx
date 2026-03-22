@@ -9,6 +9,7 @@ import { computeArchetype } from "@/lib/stats";
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
+  try {
   const { searchParams } = new URL(request.url);
   const u1 = searchParams.get("u1");
   const u2 = searchParams.get("u2");
@@ -129,14 +130,12 @@ export async function GET(request: Request) {
               fontSize: "100px",
               fontWeight: 700,
               lineHeight: 1,
-              background:
+              color:
                 result.compatibilityScore >= 70
-                  ? "linear-gradient(135deg, #c084fc, #f472b6)"
+                  ? "#c084fc"
                   : result.compatibilityScore >= 40
-                    ? "linear-gradient(135deg, #fbbf24, #f97316)"
-                    : "linear-gradient(135deg, #ef4444, #dc2626)",
-              backgroundClip: "text",
-              color: "transparent",
+                    ? "#fbbf24"
+                    : "#ef4444",
             }}
           >
             {result.compatibilityScore}%
@@ -279,4 +278,8 @@ export async function GET(request: Request) {
       height: 630,
     }
   );
+  } catch (e) {
+    console.error("OG compare image error:", e);
+    return new Response("Failed to generate image", { status: 500 });
+  }
 }

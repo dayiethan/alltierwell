@@ -25,6 +25,7 @@ export default function CardPreviewModal({
     const fetchImage = async () => {
       try {
         const res = await fetch(imageUrl);
+        if (!res.ok) throw new Error(`${res.status}`);
         const blob = await res.blob();
         if (!cancelled) {
           setBlobUrl(URL.createObjectURL(blob));

@@ -179,7 +179,7 @@ export default function Header() {
                 </Link>
               </>
             )}
-            <AuthButton user={user} loading={loading} />
+            <AuthButton user={user} loading={loading} onNavigate={() => setMenuOpen(false)} />
           </nav>
         </div>
       )}

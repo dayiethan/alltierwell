@@ -8,6 +8,7 @@ import { TIER_COLORS, TIERS } from "@/lib/constants";
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
+  try {
   const { searchParams } = new URL(request.url);
   const username = searchParams.get("username");
 
@@ -19,7 +20,7 @@ export async function GET(request: Request) {
 
   const { data: profile } = await supabase
     .from("users")
-    .select("display_name, username")
+    .select("id, display_name, username")
     .eq("username", username)
     .single();
 
@@ -36,16 +37,7 @@ export async function GET(request: Request) {
     supabase
       .from("tier_entries")
       .select("*")
-      .eq(
-        "user_id",
-        (
-          await supabase
-            .from("users")
-            .select("id")
-            .eq("username", username)
-            .single()
-        ).data!.id
-      ),
+      .eq("user_id", profile.id),
   ]);
 
   const songs = normalizeSongs(songsRes.data ?? []);
@@ -201,4 +193,8 @@ export async function GET(request: Request) {
       height: 630,
     }
   );
+  } catch (e) {
+    console.error("OG profile image error:", e);
+    return new Response("Failed to generate image", { status: 500 });
+  }
 }

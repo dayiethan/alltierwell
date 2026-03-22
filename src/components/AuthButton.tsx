@@ -8,9 +8,10 @@ import Link from "next/link";
 interface AuthButtonProps {
   user: User | null;
   loading: boolean;
+  onNavigate?: () => void;
 }
 
-export default function AuthButton({ user, loading }: AuthButtonProps) {
+export default function AuthButton({ user, loading, onNavigate }: AuthButtonProps) {
   const [username, setUsername] = useState<string | null>(null);
   const supabase = createClient();
 
@@ -50,7 +51,7 @@ export default function AuthButton({ user, loading }: AuthButtonProps) {
     return (
       <div className="flex items-center">
         {user.user_metadata?.avatar_url && username ? (
-          <Link href={`/user/${username}`}>
+          <Link href={`/user/${username}`} onClick={onNavigate}>
             <img
               src={user.user_metadata.avatar_url}
               alt="Avatar"
@@ -61,6 +62,7 @@ export default function AuthButton({ user, loading }: AuthButtonProps) {
         ) : (
           <Link
             href={username ? `/user/${username}` : "/settings"}
+            onClick={onNavigate}
             className="flex h-7 w-7 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground hover:ring-2 hover:ring-gray-300 transition-all"
           >
             {user.email?.charAt(0).toUpperCase() ?? "?"}
