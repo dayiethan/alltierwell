@@ -63,11 +63,24 @@ export default async function ComparisonPage({ params }: Props) {
   const user1Archetype = computeArchetype(entries1, songs);
   const user2Archetype = computeArchetype(entries2, songs);
 
-  // Log this comparison (fire-and-forget, don't block render)
-  supabase.from("comparison_log").insert({
-    user1_id: user1.id,
-    user2_id: user2.id,
-  });
+  // Cache comparison score (don't block render, but log errors)
+  // Normalize order: smaller UUID first to match CHECK constraint
+  const [logId1, logId2] =
+    user1.id < user2.id ? [user1.id, user2.id] : [user2.id, user1.id];
+  supabase
+    .from("comparison_log")
+    .upsert(
+      {
+        user1_id: logId1,
+        user2_id: logId2,
+        compatibility_score: result.compatibilityScore,
+        compared_at: new Date().toISOString(),
+      },
+      { onConflict: "user1_id,user2_id" }
+    )
+    .then(({ error }) => {
+      if (error) console.error("comparison_log upsert failed:", error);
+    });
 
   return (
     <div className="py-8">

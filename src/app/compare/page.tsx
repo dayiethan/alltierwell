@@ -3,10 +3,12 @@
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import ComparisonLeaderboard from "@/components/comparison/ComparisonLeaderboard";
 
 export default function ComparePage() {
   const supabase = createClient();
   const router = useRouter();
+  const [myUserId, setMyUserId] = useState<string | null>(null);
   const [myUsername, setMyUsername] = useState<string | null>(null);
   const [otherUsername, setOtherUsername] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +27,10 @@ export default function ComparePage() {
         .eq("id", user.id)
         .single();
 
-      if (profile) setMyUsername(profile.username);
+      if (profile) {
+        setMyUserId(user.id);
+        setMyUsername(profile.username);
+      }
       setLoading(false);
     };
     load();
@@ -72,7 +77,7 @@ export default function ComparePage() {
   }
 
   return (
-    <div className="flex min-h-[60vh] items-center justify-center">
+    <div className="flex min-h-[60vh] flex-col items-center justify-start pt-16">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold">Compare Tier Lists</h1>
@@ -107,6 +112,10 @@ export default function ComparePage() {
             Compare
           </button>
         </form>
+
+        {myUserId && myUsername && (
+          <ComparisonLeaderboard myUserId={myUserId} myUsername={myUsername} />
+        )}
       </div>
     </div>
   );
