@@ -49,6 +49,8 @@ export async function GET(request: Request) {
       "id" | "display_name" | "username"
     >;
 
+    const { origin } = new URL(request.url);
+
     const [songsRes, entries1Res, entries2Res, fontData] = await Promise.all([
       supabase
         .from("songs")
@@ -57,9 +59,7 @@ export async function GET(request: Request) {
         .order("track_number"),
       supabase.from("tier_entries").select("*").eq("user_id", user1.id),
       supabase.from("tier_entries").select("*").eq("user_id", user2.id),
-      fetch(new URL("../fonts/SpaceGrotesk.ttf", import.meta.url)).then((r) =>
-        r.arrayBuffer()
-      ),
+      fetch(`${origin}/fonts/SpaceGrotesk.ttf`).then((r) => r.arrayBuffer()),
     ]);
 
     const songs = normalizeSongs(songsRes.data ?? []);
@@ -70,8 +70,6 @@ export async function GET(request: Request) {
     const flavorText = getFlavorText(result.compatibilityScore);
     const user1Archetype = computeArchetype(entries1, songs);
     const user2Archetype = computeArchetype(entries2, songs);
-
-    const { origin } = new URL(request.url);
 
     const user1FavEra = result.user1TopEras[0]?.shortName ?? "\u2014";
     const user2FavEra = result.user2TopEras[0]?.shortName ?? "\u2014";

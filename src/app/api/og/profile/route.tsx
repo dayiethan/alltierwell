@@ -88,10 +88,10 @@ export async function GET(request: Request) {
       ? `${origin}${theme.albumImage}`
       : null;
 
-    // Load the theme-appropriate font
+    // Load the theme-appropriate font from public directory
     const fontInfo = FONT_FILES[theme.fontClass] ?? FONT_FILES["font-sans"];
     const fontData = await fetch(
-      new URL(`../fonts/${fontInfo.file}`, import.meta.url)
+      `${origin}/fonts/${fontInfo.file}`
     ).then((r) => r.arrayBuffer());
 
     const maxTierCount = Math.max(...Object.values(stats.tierCounts), 1);
