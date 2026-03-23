@@ -2,8 +2,17 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { useTheme } from "@/components/ThemeProvider";
-import { ERA_THEMES } from "@/lib/themes";
+import { ERA_THEMES, getThemeById } from "@/lib/themes";
 import type { EraTheme } from "@/lib/themes";
+
+const THEME_ALBUM_IMAGES = new Set(
+  ERA_THEMES.map((t) => t.albumImage).filter(Boolean) as string[]
+);
+
+function isThemeAlbumImage(url: string | null): boolean {
+  if (!url) return false;
+  return THEME_ALBUM_IMAGES.has(url);
+}
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -19,6 +28,9 @@ export default function SettingsPage() {
   const [username, setUsername] = useState("");
   const [originalUsername, setOriginalUsername] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isPublic, setIsPublic] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
@@ -49,7 +61,7 @@ export default function SettingsPage() {
 
       const { data: profile } = await supabase
         .from("users")
-        .select("username, display_name, is_public")
+        .select("username, display_name, is_public, avatar_url")
         .eq("id", user.id)
         .single();
 
@@ -58,6 +70,7 @@ export default function SettingsPage() {
         setOriginalUsername(profile.username);
         setDisplayName(profile.display_name);
         setIsPublic(profile.is_public);
+        setAvatarUrl(profile.avatar_url);
       }
       setLoading(false);
     };
@@ -94,6 +107,144 @@ export default function SettingsPage() {
     const value = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "");
     setUsername(value);
     checkAvailability(value);
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !userId) return;
+
+    // Validate file
+    const maxSize = 2 * 1024 * 1024; // 2MB
+    if (file.size > maxSize) {
+      setSaveMessage("Image must be under 2MB.");
+      setTimeout(() => setSaveMessage(null), 3000);
+      return;
+    }
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setSaveMessage("Only JPG, PNG, and WebP images are supported.");
+      setTimeout(() => setSaveMessage(null), 3000);
+      return;
+    }
+
+    setUploadingAvatar(true);
+    setSaveMessage(null);
+
+    const ext = file.name.split(".").pop() ?? "jpg";
+    const filePath = `${userId}/avatar.${ext}`;
+
+    // Upload to Supabase Storage (upsert)
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      console.error("Avatar upload error:", uploadError);
+      setSaveMessage(`Failed to upload image: ${uploadError.message}`);
+      setTimeout(() => setSaveMessage(null), 5000);
+      setUploadingAvatar(false);
+      return;
+    }
+
+    // Get the public URL
+    const { data: urlData } = supabase.storage
+      .from("avatars")
+      .getPublicUrl(filePath);
+
+    const newUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+
+    // Update the user's avatar_url in the database
+    const { error: updateError } = await supabase
+      .from("users")
+      .update({ avatar_url: newUrl })
+      .eq("id", userId);
+
+    if (updateError) {
+      setSaveMessage("Failed to update profile picture.");
+      setTimeout(() => setSaveMessage(null), 3000);
+    } else {
+      setAvatarUrl(newUrl);
+      setSaveMessage("Profile picture updated.");
+      setTimeout(() => setSaveMessage(null), 3000);
+    }
+
+    setUploadingAvatar(false);
+    // Reset file input
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleRemoveAvatar = async () => {
+    if (!userId) return;
+    setUploadingAvatar(true);
+
+    // Update database to remove avatar
+    await supabase
+      .from("users")
+      .update({ avatar_url: null })
+      .eq("id", userId);
+
+    setAvatarUrl(null);
+    setSaveMessage("Profile picture removed.");
+    setTimeout(() => setSaveMessage(null), 3000);
+    setUploadingAvatar(false);
+  };
+
+  const handleUseEraArt = async () => {
+    if (!userId) return;
+    const themeDef = getThemeById(theme);
+    if (!themeDef.albumImage) return;
+
+    setUploadingAvatar(true);
+    await supabase
+      .from("users")
+      .update({ avatar_url: themeDef.albumImage })
+      .eq("id", userId);
+
+    setAvatarUrl(themeDef.albumImage);
+    setSaveMessage("Profile picture set to era theme art.");
+    setTimeout(() => setSaveMessage(null), 3000);
+    setUploadingAvatar(false);
+  };
+
+  const handleUseGooglePhoto = async () => {
+    if (!userId) return;
+    setUploadingAvatar(true);
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const googleUrl = user?.user_metadata?.avatar_url ?? null;
+
+    if (!googleUrl) {
+      setSaveMessage("No Google profile picture found.");
+      setTimeout(() => setSaveMessage(null), 3000);
+      setUploadingAvatar(false);
+      return;
+    }
+
+    await supabase
+      .from("users")
+      .update({ avatar_url: googleUrl })
+      .eq("id", userId);
+
+    setAvatarUrl(googleUrl);
+    setSaveMessage("Profile picture set to Google photo.");
+    setTimeout(() => setSaveMessage(null), 3000);
+    setUploadingAvatar(false);
+  };
+
+  // When theme changes, auto-update avatar if using era art
+  const handleThemeChange = async (newTheme: EraTheme) => {
+    setTheme(newTheme);
+
+    if (isThemeAlbumImage(avatarUrl) && userId) {
+      const newThemeDef = getThemeById(newTheme);
+      const newImage = newThemeDef.albumImage ?? null;
+      await supabase
+        .from("users")
+        .update({ avatar_url: newImage })
+        .eq("id", userId);
+      setAvatarUrl(newImage);
+    }
   };
 
   const handleSaveProfile = async () => {
@@ -184,6 +335,75 @@ export default function SettingsPage() {
           Profile
         </h2>
         <div className="mt-4 space-y-4 rounded-xl border border-border bg-card p-5">
+          {/* Profile Picture */}
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-3">
+              Profile Picture
+            </label>
+            <div className="flex items-center gap-4">
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="Profile"
+                  className="h-16 w-16 rounded-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted text-xl font-bold text-muted-foreground">
+                  {displayName?.[0]?.toUpperCase() ?? "?"}
+                </div>
+              )}
+              <div className="flex flex-col gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleAvatarUpload}
+                  className="hidden"
+                />
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingAvatar}
+                    className="rounded-md border border-border px-3 py-1.5 text-sm font-medium hover:bg-muted transition-colors disabled:opacity-50"
+                  >
+                    {uploadingAvatar ? "Uploading..." : "Upload Photo"}
+                  </button>
+                  <button
+                    onClick={handleUseGooglePhoto}
+                    disabled={uploadingAvatar}
+                    className="rounded-md border border-border px-3 py-1.5 text-sm font-medium hover:bg-muted transition-colors disabled:opacity-50"
+                  >
+                    Google Photo
+                  </button>
+                  {getThemeById(theme).albumImage && (
+                    <button
+                      onClick={handleUseEraArt}
+                      disabled={uploadingAvatar}
+                      className="rounded-md border border-border px-3 py-1.5 text-sm font-medium hover:bg-muted transition-colors disabled:opacity-50"
+                    >
+                      Use Era Art
+                    </button>
+                  )}
+                </div>
+                {avatarUrl && (
+                  <button
+                    onClick={handleRemoveAvatar}
+                    disabled={uploadingAvatar}
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 text-left"
+                  >
+                    Remove picture
+                  </button>
+                )}
+              </div>
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {isThemeAlbumImage(avatarUrl)
+                ? "Using era theme art — changes automatically when you switch themes."
+                : "JPG, PNG, or WebP. Max 2MB."}
+            </p>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-muted-foreground">
               Username
@@ -278,7 +498,7 @@ export default function SettingsPage() {
             return (
               <button
                 key={t.id}
-                onClick={() => setTheme(t.id as EraTheme)}
+                onClick={() => handleThemeChange(t.id as EraTheme)}
                 className="group relative overflow-hidden rounded-xl border-2 p-3 text-left transition-all"
                 style={{
                   borderColor: isActive ? t.colors.accent : t.colors.border,

@@ -13,23 +13,28 @@ interface AuthButtonProps {
 
 export default function AuthButton({ user, loading, onNavigate }: AuthButtonProps) {
   const [username, setUsername] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
     if (!user) {
       setUsername(null);
+      setAvatarUrl(null);
       return;
     }
 
-    const fetchUsername = async () => {
+    const fetchProfile = async () => {
       const { data: profile } = await supabase
         .from("users")
-        .select("username")
+        .select("username, avatar_url")
         .eq("id", user.id)
         .single();
-      if (profile) setUsername(profile.username);
+      if (profile) {
+        setUsername(profile.username);
+        setAvatarUrl(profile.avatar_url);
+      }
     };
-    fetchUsername();
+    fetchProfile();
   }, [user, supabase]);
 
   const handleSignIn = async () => {
@@ -50,12 +55,12 @@ export default function AuthButton({ user, loading, onNavigate }: AuthButtonProp
   if (user) {
     return (
       <div className="flex items-center">
-        {user.user_metadata?.avatar_url && username ? (
+        {avatarUrl && username ? (
           <Link href={`/user/${username}`} onClick={onNavigate}>
             <img
-              src={user.user_metadata.avatar_url}
+              src={avatarUrl}
               alt="Avatar"
-              className="h-7 w-7 rounded-full hover:ring-2 hover:ring-gray-300 transition-all"
+              className="h-7 w-7 rounded-full object-cover hover:ring-2 hover:ring-gray-300 transition-all"
               referrerPolicy="no-referrer"
             />
           </Link>
