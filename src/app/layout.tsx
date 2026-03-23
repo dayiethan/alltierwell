@@ -75,6 +75,21 @@ export default function RootLayout({
         <ThemeProvider>
           <Header />
           <main className="mx-auto max-w-5xl px-4">{children}</main>
+          <footer className="mt-16 border-t py-6" style={{ borderColor: "var(--border)" }}>
+            <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-x-6 gap-y-2 px-4 text-xs text-muted-foreground">
+              <span>All Tier Well</span>
+              <a href="/privacy" className="hover:text-foreground transition-colors">Privacy</a>
+              <a href="/terms" className="hover:text-foreground transition-colors">Terms</a>
+              <a
+                href="https://github.com/dayiethan/alltierwell"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-foreground transition-colors"
+              >
+                GitHub
+              </a>
+            </div>
+          </footer>
         </ThemeProvider>
         <Analytics />
       </body>
