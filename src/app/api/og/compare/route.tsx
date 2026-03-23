@@ -447,6 +447,6 @@ export async function GET(request: Request) {
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error("OG compare image error:", msg, e);
-    return new Response(`Failed to generate image: ${msg}`, { status: 500 });
+    return new Response("Failed to generate image", { status: 500 });
   }
 }

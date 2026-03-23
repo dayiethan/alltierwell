@@ -75,11 +75,11 @@ export default async function UserProfilePage({ params }: Props) {
 
   const stats = computeStats(entries, songs);
 
-  // Log profile view (fire-and-forget)
-  if (currentUser?.id !== typedProfile.id) {
+  // Log profile view (fire-and-forget, authenticated users only)
+  if (currentUser && currentUser.id !== typedProfile.id) {
     supabase.from("user_events").insert({
       event_type: "profile_view",
-      actor_id: currentUser?.id ?? null,
+      actor_id: currentUser.id,
       target_user_id: typedProfile.id,
     });
   }

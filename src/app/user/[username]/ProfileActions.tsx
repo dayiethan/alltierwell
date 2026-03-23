@@ -24,10 +24,11 @@ export default function ProfileActions({
   const router = useRouter();
 
   const logEvent = (eventType: string) => {
+    if (!currentUserId) return;
     const supabase = createClient();
     supabase.from("user_events").insert({
       event_type: eventType,
-      actor_id: currentUserId ?? null,
+      actor_id: currentUserId,
       target_user_id: targetUserId,
     });
   };
