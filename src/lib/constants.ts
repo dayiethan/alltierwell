@@ -1,4 +1,4 @@
-import type { Tier } from "@/lib/types";
+import type { Song, Tier } from "@/lib/types";
 
 export const TIERS: Tier[] = ["S", "A", "B", "C", "D", "F"];
 
@@ -92,4 +92,15 @@ export function getDisagreementLabel(distance: number): string {
   if (distance >= 4) return "Heated Debate";
   if (distance >= 3) return "Strong Opinions";
   return "Minor Disagreement";
+}
+
+/** Get the display image for a song: per-song image for non-album songs, album art otherwise */
+export function getSongImage(song: Song): string | undefined {
+  if (song.image_url) return song.image_url;
+  return ALBUMS.find((a) => a.name === song.album)?.image;
+}
+
+/** Get the album color for a song */
+export function getSongAlbumColor(song: Song): string {
+  return ALBUMS.find((a) => a.name === song.album)?.color ?? "#888";
 }

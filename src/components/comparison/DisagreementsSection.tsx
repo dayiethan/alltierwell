@@ -1,7 +1,7 @@
 "use client";
 
 import type { ComparisonResult, Tier } from "@/lib/types";
-import { TIER_COLORS, ALBUMS, getDisagreementLabel } from "@/lib/constants";
+import { TIER_COLORS, ALBUMS, getDisagreementLabel, getSongImage, getSongAlbumColor } from "@/lib/constants";
 import { useState } from "react";
 
 interface DisagreementsSectionProps {
@@ -27,11 +27,8 @@ export default function DisagreementsSection({
     <div className="space-y-5">
       {/* Biggest disagreement spotlight + remaining disagreements */}
       {topDisagreement && (() => {
-        const album = ALBUMS.find(
-          (a) => a.name === topDisagreement.song.album
-        );
-        const albumColor = album?.color ?? "#888";
-        const albumImage = album?.image;
+        const albumColor = getSongAlbumColor(topDisagreement.song);
+        const albumImage = getSongImage(topDisagreement.song);
         const label = getDisagreementLabel(topDisagreement.distance);
 
         return (

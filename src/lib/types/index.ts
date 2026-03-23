@@ -8,6 +8,7 @@ export interface Song {
   track_number: number;
   is_vault: boolean;
   tags: string[];
+  image_url?: string | null;
 }
 
 export interface UserProfile {

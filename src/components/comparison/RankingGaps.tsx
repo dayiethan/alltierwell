@@ -1,7 +1,7 @@
 "use client";
 
 import type { Song, Tier } from "@/lib/types";
-import { TIER_COLORS, ALBUMS, ALBUM_SHORT_NAMES } from "@/lib/constants";
+import { TIER_COLORS, ALBUM_SHORT_NAMES, getSongAlbumColor } from "@/lib/constants";
 import { useState } from "react";
 
 interface RankingGapsProps {
@@ -87,8 +87,7 @@ function GapList({
       ) : (
       <div className="space-y-2">
         {items.map(({ song, tier }) => {
-          const album = ALBUMS.find((a) => a.name === song.album);
-          const albumColor = album?.color ?? "#888";
+          const albumColor = getSongAlbumColor(song);
           const shortAlbum = ALBUM_SHORT_NAMES[song.album] ?? song.album;
 
           return (

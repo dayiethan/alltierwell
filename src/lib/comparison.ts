@@ -66,7 +66,7 @@ function computeEraIdentity(
   const globalAvg = entries.length > 0 ? globalTotalTier / entries.length : 2.5;
 
   return Object.entries(albumStats)
-    .filter(([, stats]) => stats.count >= 3)
+    .filter(([album, stats]) => album !== "Non-Album" && stats.count >= 3)
     .map(([album, stats]) => {
       const albumData = ALBUMS.find((a) => a.name === album) as
         | { name: string; color: string; image: string }

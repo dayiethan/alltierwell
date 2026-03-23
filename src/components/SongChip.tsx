@@ -1,7 +1,7 @@
 "use client";
 
 import type { Song, Tier } from "@/lib/types";
-import { ALBUMS, TIER_COLORS } from "@/lib/constants";
+import { TIER_COLORS, getSongImage, getSongAlbumColor } from "@/lib/constants";
 
 interface SongChipProps {
   song: Song;
@@ -16,9 +16,8 @@ export default function SongChip({
   onClick,
   compact = false,
 }: SongChipProps) {
-  const album = ALBUMS.find((a) => a.name === song.album);
-  const albumColor = album?.color ?? "#888";
-  const albumImage = album?.image;
+  const albumColor = getSongAlbumColor(song);
+  const albumImage = getSongImage(song);
 
   return (
     <button

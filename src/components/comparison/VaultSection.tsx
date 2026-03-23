@@ -1,7 +1,7 @@
 "use client";
 
 import type { ComparisonResult, Tier } from "@/lib/types";
-import { TIER_COLORS, ALBUMS } from "@/lib/constants";
+import { TIER_COLORS, getSongImage, getSongAlbumColor } from "@/lib/constants";
 import { useState } from "react";
 
 interface VaultSectionProps {
@@ -64,11 +64,8 @@ export default function VaultSection({
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {vaultVerdict.sharedVaultSameTier.map(({ song, tier }) => {
-                    const album = ALBUMS.find(
-                      (a) => a.name === song.album
-                    ) as
-                      | { name: string; color: string; image: string }
-                      | undefined;
+                    const songImage = getSongImage(song);
+                    const albumColor = getSongAlbumColor(song);
                     return (
                       <span
                         key={song.id}
@@ -77,9 +74,9 @@ export default function VaultSection({
                           backgroundColor: `${TIER_COLORS[tier]}15`,
                         }}
                       >
-                        {album?.image ? (
+                        {songImage ? (
                           <img
-                            src={album.image}
+                            src={songImage}
                             alt=""
                             className="h-3.5 w-3.5 rounded-sm object-cover"
                           />
@@ -87,7 +84,7 @@ export default function VaultSection({
                           <span
                             className="h-2 w-2 rounded-full"
                             style={{
-                              backgroundColor: album?.color ?? "#888",
+                              backgroundColor: albumColor,
                             }}
                           />
                         )}
@@ -119,11 +116,8 @@ export default function VaultSection({
               {deepCutSoulmates
                 .slice(0, showDeepCuts ? undefined : 8)
                 .map(({ song, tier }) => {
-                  const album = ALBUMS.find(
-                    (a) => a.name === song.album
-                  ) as
-                    | { name: string; color: string; image: string }
-                    | undefined;
+                  const songImage = getSongImage(song);
+                  const albumColor = getSongAlbumColor(song);
                   return (
                     <span
                       key={song.id}
@@ -132,9 +126,9 @@ export default function VaultSection({
                         backgroundColor: `${TIER_COLORS[tier]}15`,
                       }}
                     >
-                      {album?.image ? (
+                      {songImage ? (
                         <img
-                          src={album.image}
+                          src={songImage}
                           alt=""
                           className="h-3.5 w-3.5 rounded-sm object-cover"
                         />
@@ -142,7 +136,7 @@ export default function VaultSection({
                         <span
                           className="h-2 w-2 rounded-full"
                           style={{
-                            backgroundColor: album?.color ?? "#888",
+                            backgroundColor: albumColor,
                           }}
                         />
                       )}

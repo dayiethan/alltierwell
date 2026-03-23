@@ -1,7 +1,7 @@
 "use client";
 
 import type { Song, Tier, TierEntry } from "@/lib/types";
-import { TIERS, TIER_COLORS, ALBUMS } from "@/lib/constants";
+import { TIERS, TIER_COLORS, getSongImage, getSongAlbumColor } from "@/lib/constants";
 
 interface TierListDisplayProps {
   entries: TierEntry[];
@@ -49,18 +49,17 @@ export default function TierListDisplay({
           </div>
           <div className="flex flex-1 flex-wrap gap-1 p-1.5">
             {tierGroups[tier].map((song) => {
-              const album = ALBUMS.find((a) => a.name === song.album) as
-                | { name: string; color: string; image: string }
-                | undefined;
+              const songImage = getSongImage(song);
+              const albumColor = getSongAlbumColor(song);
               return (
                 <span
                   key={song.id}
                   className="inline-flex items-center gap-1 rounded border border-border px-2 py-0.5 text-xs"
                   style={{ backgroundColor: `${TIER_COLORS[tier]}15` }}
                 >
-                  {album?.image ? (
+                  {songImage ? (
                     <img
-                      src={album.image}
+                      src={songImage}
                       alt=""
                       className="h-3.5 w-3.5 flex-shrink-0 rounded-sm object-cover"
                       onError={(e) => {
@@ -71,8 +70,8 @@ export default function TierListDisplay({
                     />
                   ) : null}
                   <span
-                    className={`h-3.5 w-3.5 flex-shrink-0 rounded-sm ${album?.image ? "hidden" : ""}`}
-                    style={{ backgroundColor: (album?.color ?? "#888") + "40" }}
+                    className={`h-3.5 w-3.5 flex-shrink-0 rounded-sm ${songImage ? "hidden" : ""}`}
+                    style={{ backgroundColor: albumColor + "40" }}
                   />
                   {song.title}
                 </span>

@@ -7,6 +7,8 @@ import {
   TIER_ORDER,
   ALBUMS,
   ALBUM_SHORT_NAMES,
+  getSongImage,
+  getSongAlbumColor,
 } from "@/lib/constants";
 
 export const metadata = {
@@ -410,25 +412,24 @@ function SongRow({
   pct: number;
   color: string;
 }) {
-  const album = ALBUMS.find((a) => a.name === song.album) as
-    | { name: string; color: string; image: string }
-    | undefined;
+  const songImage = getSongImage(song);
+  const albumColor = getSongAlbumColor(song);
 
   return (
     <div className="flex items-center gap-2.5">
       <span className="w-5 text-xs font-bold text-muted-foreground/50 text-right">
         {rank}
       </span>
-      {album?.image ? (
+      {songImage ? (
         <img
-          src={album.image}
+          src={songImage}
           alt=""
           className="h-7 w-7 rounded object-cover flex-shrink-0"
         />
       ) : (
         <div
           className="h-7 w-7 rounded flex-shrink-0"
-          style={{ backgroundColor: (album?.color ?? "#888") + "30" }}
+          style={{ backgroundColor: albumColor + "30" }}
         />
       )}
       <div className="min-w-0 flex-1">

@@ -237,9 +237,11 @@ export function computeStats(
   const globalAvg = entries.length > 0 ? globalTotalTier / entries.length : 2.5;
 
   // Find favorite era using Bayesian-adjusted average tier (lower = better)
+  // Exclude Non-Album since it spans all eras and isn't a meaningful "favorite era"
   let favoriteAlbum: string | null = null;
   let bestAdjusted = Infinity;
   for (const [album, stats] of Object.entries(albumStats)) {
+    if (album === "Non-Album") continue;
     if (stats.count < 3) continue;
     const rawAvg = stats.totalTier / stats.count;
     const adjustedAvg =

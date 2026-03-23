@@ -1,7 +1,7 @@
 "use client";
 
 import type { ComparisonResult, Song, Tier } from "@/lib/types";
-import { TIERS, TIER_COLORS, ALBUMS } from "@/lib/constants";
+import { TIERS, TIER_COLORS, getSongImage, getSongAlbumColor } from "@/lib/constants";
 import { useState } from "react";
 
 interface AgreementsSectionProps {
@@ -120,9 +120,8 @@ export default function AgreementsSection({ result }: AgreementsSectionProps) {
 }
 
 function SongCard({ song }: { song: Song }) {
-  const album = ALBUMS.find((a) => a.name === song.album);
-  const albumColor = album?.color ?? "#888";
-  const albumImage = album?.image;
+  const albumColor = getSongAlbumColor(song);
+  const albumImage = getSongImage(song);
 
   return (
     <div className="flex items-center gap-3 rounded-lg bg-card/60 px-3 py-2.5 border border-border">
@@ -167,8 +166,7 @@ function TierBadge({ tier }: { tier: Tier }) {
 }
 
 function SongTag({ song, tier }: { song: Song; tier: Tier }) {
-  const albumColor =
-    ALBUMS.find((a) => a.name === song.album)?.color ?? "#888";
+  const albumColor = getSongAlbumColor(song);
   return (
     <span
       className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-0.5 text-xs"
