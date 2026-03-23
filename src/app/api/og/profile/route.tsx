@@ -8,6 +8,16 @@ import { getThemeById, type EraTheme } from "@/lib/themes";
 
 export const runtime = "edge";
 
+const FONT_FILES: Record<string, { file: string; name: string }> = {
+  "font-sans": { file: "SpaceGrotesk.ttf", name: "Space Grotesk" },
+  "font-serif": { file: "Lora.ttf", name: "Lora" },
+  "font-rounded": { file: "Quicksand.ttf", name: "Quicksand" },
+  "font-typewriter": { file: "SpecialElite.ttf", name: "Special Elite" },
+  "font-display": { file: "PlayfairDisplay.ttf", name: "Playfair Display" },
+  "font-condensed": { file: "Oswald.ttf", name: "Oswald" },
+  "font-modern": { file: "DMSans.ttf", name: "DM Sans" },
+};
+
 const ALBUM_TO_THEME: Record<string, EraTheme> = {
   "Taylor Swift": "taylor-swift",
   Fearless: "fearless",
@@ -26,10 +36,6 @@ const ALBUM_TO_THEME: Record<string, EraTheme> = {
   "The Tortured Poets Department": "ttpd",
   "The Life of a Showgirl": "showgirl",
 };
-
-const fontPromise = fetch(
-  new URL("../fonts/SpaceGrotesk.ttf", import.meta.url)
-).then((r) => r.arrayBuffer());
 
 export async function GET(request: Request) {
   try {
@@ -64,8 +70,6 @@ export async function GET(request: Request) {
       supabase.from("tier_entries").select("*").eq("user_id", profile.id),
     ]);
 
-    const fontData = await fontPromise;
-
     const songs = normalizeSongs(songsRes.data ?? []);
     const entries = (entriesRes.data ?? []) as TierEntry[];
     const stats = computeStats(entries, songs);
@@ -84,6 +88,12 @@ export async function GET(request: Request) {
       ? `${origin}${theme.albumImage}`
       : null;
 
+    // Load the theme-appropriate font
+    const fontInfo = FONT_FILES[theme.fontClass] ?? FONT_FILES["font-sans"];
+    const fontData = await fetch(
+      new URL(`../fonts/${fontInfo.file}`, import.meta.url)
+    ).then((r) => r.arrayBuffer());
+
     const maxTierCount = Math.max(...Object.values(stats.tierCounts), 1);
 
     return new ImageResponse(
@@ -95,7 +105,7 @@ export async function GET(request: Request) {
             width: "100%",
             height: "100%",
             overflow: "hidden",
-            fontFamily: "'Space Grotesk', sans-serif",
+            fontFamily: `'${fontInfo.name}', sans-serif`,
           }}
         >
           {/* Background color */}
@@ -302,7 +312,7 @@ export async function GET(request: Request) {
         width: 1200,
         height: 630,
         fonts: [
-          { name: "Space Grotesk", data: fontData, weight: 400 as const },
+          { name: fontInfo.name, data: fontData, weight: 400 as const },
         ],
       }
     );

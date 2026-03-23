@@ -8,10 +8,6 @@ import { computeArchetype } from "@/lib/stats";
 
 export const runtime = "edge";
 
-const fontPromise = fetch(
-  new URL("../fonts/SpaceGrotesk.ttf", import.meta.url)
-).then((r) => r.arrayBuffer());
-
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -53,7 +49,7 @@ export async function GET(request: Request) {
       "id" | "display_name" | "username"
     >;
 
-    const [songsRes, entries1Res, entries2Res] = await Promise.all([
+    const [songsRes, entries1Res, entries2Res, fontData] = await Promise.all([
       supabase
         .from("songs")
         .select("*")
@@ -61,9 +57,10 @@ export async function GET(request: Request) {
         .order("track_number"),
       supabase.from("tier_entries").select("*").eq("user_id", user1.id),
       supabase.from("tier_entries").select("*").eq("user_id", user2.id),
+      fetch(new URL("../fonts/SpaceGrotesk.ttf", import.meta.url)).then((r) =>
+        r.arrayBuffer()
+      ),
     ]);
-
-    const fontData = await fontPromise;
 
     const songs = normalizeSongs(songsRes.data ?? []);
     const entries1 = (entries1Res.data ?? []) as TierEntry[];
