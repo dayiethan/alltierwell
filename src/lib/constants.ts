@@ -94,6 +94,37 @@ export function getDisagreementLabel(distance: number): string {
   return "Minor Disagreement";
 }
 
+/** Tier → score out of 10 mapping */
+export const TIER_SCORE: Record<Tier, number> = {
+  S: 10,
+  A: 8,
+  B: 6,
+  C: 4,
+  D: 2,
+  F: 0,
+};
+
+/** Convert an average TIER_ORDER value (0-5) to a score out of 10 */
+export function tierOrderToScore(avgTierOrder: number): number {
+  // TIER_ORDER: S=0, A=1, B=2, C=3, D=4, F=5
+  // TIER_SCORE: S=10, A=8, B=6, C=4, D=2, F=0
+  // Linear mapping: score = 10 - (avgTierOrder * 2)
+  return Math.max(0, Math.min(10, 10 - avgTierOrder * 2));
+}
+
+/** Ensure a hex color is readable as text by darkening it if too light */
+export function ensureReadableColor(hex: string): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  // Perceived luminance (ITU-R BT.709)
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  if (luminance < 0.6) return hex;
+  // Darken by 40%
+  const d = (v: number) => Math.round(v * 0.6).toString(16).padStart(2, "0");
+  return `#${d(r)}${d(g)}${d(b)}`;
+}
+
 /** Get the display image for a song: per-song image for non-album songs, album art otherwise */
 export function getSongImage(song: Song): string | undefined {
   if (song.image_url) return song.image_url;

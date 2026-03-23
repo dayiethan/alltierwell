@@ -9,6 +9,8 @@ import {
   ALBUM_SHORT_NAMES,
   getSongImage,
   getSongAlbumColor,
+  tierOrderToScore,
+  ensureReadableColor,
 } from "@/lib/constants";
 
 export const metadata = {
@@ -144,16 +146,18 @@ export default async function StatsPage() {
       const albumData = ALBUMS.find((a) => a.name === album) as
         | { name: string; color: string; image: string }
         | undefined;
+      const avgTier = count > 0 ? totalTier / count : 3;
       return {
         album,
         shortName: ALBUM_SHORT_NAMES[album] ?? album,
         albumColor: albumData?.color ?? "#888",
         albumImage: albumData?.image,
-        avgTier: count > 0 ? totalTier / count : 3,
+        avgTier,
+        score: tierOrderToScore(avgTier),
         count,
       };
     })
-    .sort((a, b) => a.avgTier - b.avgTier);
+    .sort((a, b) => b.score - a.score);
 
   const globalTotal = Object.values(globalTierCounts).reduce(
     (a, b) => a + b,
@@ -252,14 +256,14 @@ export default async function StatsPage() {
                 <div
                   className="h-full rounded-full transition-all"
                   style={{
-                    width: `${Math.max(100 - a.avgTier * 20, 5)}%`,
+                    width: `${Math.max((a.score / 10) * 100, 3)}%`,
                     backgroundColor: a.albumColor,
                     opacity: 0.75,
                   }}
                 />
               </div>
-              <span className="w-12 text-right text-xs font-medium text-muted-foreground">
-                {tierLabel(a.avgTier)}
+              <span className="w-12 text-right text-sm font-bold" style={{ color: ensureReadableColor(a.albumColor) }}>
+                {a.score.toFixed(1)}
               </span>
             </div>
           ))}
@@ -445,11 +449,3 @@ function SongRow({
   );
 }
 
-function tierLabel(avgTier: number): string {
-  if (avgTier < 0.5) return "~S";
-  if (avgTier < 1.5) return "~A";
-  if (avgTier < 2.5) return "~B";
-  if (avgTier < 3.5) return "~C";
-  if (avgTier < 4.5) return "~D";
-  return "~F";
-}

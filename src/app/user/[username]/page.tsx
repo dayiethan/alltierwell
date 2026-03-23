@@ -5,6 +5,7 @@ import type { TierEntry, UserProfile } from "@/lib/types";
 import { normalizeSongs } from "@/lib/types";
 import ProfileStats from "@/components/ProfileStats";
 import TierListDisplay from "@/components/TierListDisplay";
+import ProfileAlbumRankings from "@/components/ProfileAlbumRankings";
 import ProfileActions from "./ProfileActions";
 import ProfileTheme from "./ProfileTheme";
 
@@ -111,6 +112,11 @@ export default async function UserProfilePage({ params }: Props) {
       {/* Stats */}
       <div className="mt-6">
         <ProfileStats stats={stats} />
+      </div>
+
+      {/* Album rankings */}
+      <div className="mt-6">
+        <ProfileAlbumRankings entries={entries} songs={songs} />
       </div>
 
       {/* Tier list */}
