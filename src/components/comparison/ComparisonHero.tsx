@@ -51,9 +51,17 @@ export default function ComparisonHero({
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-3xl font-bold">
-            {result.compatibilityScore}%
-          </span>
+          {result.sharedSongsCount === 0 ? (
+            <span className="text-sm font-medium text-muted-foreground">
+              Not enough
+              <br />
+              overlap
+            </span>
+          ) : (
+            <span className="text-3xl font-bold">
+              {result.compatibilityScore}%
+            </span>
+          )}
         </div>
       </div>
 

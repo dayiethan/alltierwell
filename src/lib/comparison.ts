@@ -152,6 +152,7 @@ export function computeComparison(
   if (sharedSongIds.length === 0) {
     return {
       compatibilityScore: 0,
+      confidence: 0,
       flavorText: getFlavorText(0),
       sharedSongsCount: 0,
       totalSongs: songs.length,
@@ -180,11 +181,7 @@ export function computeComparison(
     };
   }
 
-  // Weighted agreement band scoring:
-  // Same tier: 100, 1 apart: 70, 2 apart: 40, 3 apart: 15, 4+ apart: 0
-  const AGREEMENT_POINTS = [100, 70, 40, 15, 0, 0];
-
-  let totalPoints = 0;
+  const distances: number[] = [];
   const sameTierSongs: Record<Tier, Song[]> = {
     S: [], A: [], B: [], C: [], D: [], F: [],
   };
@@ -209,7 +206,7 @@ export function computeComparison(
     if (!song) continue;
 
     const distance = Math.abs(TIER_ORDER[tier1] - TIER_ORDER[tier2]);
-    totalPoints += AGREEMENT_POINTS[Math.min(distance, 5)];
+    distances.push(distance);
 
     if (distance === 0) {
       sameTierSongs[tier1].push(song);
@@ -240,15 +237,60 @@ export function computeComparison(
     albumStats[song.album].user2TierTotal += TIER_ORDER[tier2];
   }
 
-  // Weighted agreement score with confidence discount
-  // Raw score: average points across shared songs (0-100)
-  // Confidence: ramps linearly from 0 to 1 over 30 shared songs
-  // Final: pulls toward neutral (50) when overlap is small
-  const rawScore = totalPoints / sharedSongIds.length;
-  const confidence = Math.min(sharedSongIds.length / 30, 1);
-  const neutralScore = 50;
+  // --- Compatibility score: weighted bands + style-adjusted + sigmoid + confidence ---
+  const shared = sharedSongIds.length;
+  const avg = (arr: number[]) => arr.reduce((a, b) => a + b, 0) / arr.length;
+
+  // Weighted agreement bands: penalize bigger disagreements non-linearly
+  // Same: 1.0, 1 apart: 0.7, 2 apart: 0.4, 3 apart: 0.15, 4+: 0
+  const BAND_SCORES = [1.0, 0.7, 0.4, 0.15, 0, 0];
+  const distanceToBand = (d: number) => BAND_SCORES[Math.min(d, 5)];
+
+  // 1) Absolute agreement using weighted bands (0..1)
+  const absoluteAgreement = avg(distances.map(distanceToBand));
+
+  // 2) Style-adjusted agreement: forgive global grading bias
+  //    If one user grades everything 1 tier harsher, remove that offset
+  const user1SharedAvg = avg(sharedSongIds.map((id) => TIER_ORDER[user1Map.get(id)!]));
+  const user2SharedAvg = avg(sharedSongIds.map((id) => TIER_ORDER[user2Map.get(id)!]));
+  const gradingBias = user1SharedAvg - user2SharedAvg;
+
+  const adjustedAgreement = avg(
+    sharedSongIds.map((id) => {
+      const t1 = TIER_ORDER[user1Map.get(id)!];
+      const t2 = TIER_ORDER[user2Map.get(id)!];
+      const adjustedDistance = Math.round(
+        Math.min(5, Math.max(0, Math.abs((t1 - t2) - gradingBias)))
+      );
+      return distanceToBand(adjustedDistance);
+    })
+  );
+
+  // 3) Blend absolute + style-adjusted
+  const tasteAgreement = 0.7 * absoluteAgreement + 0.3 * adjustedAgreement;
+
+  // 4) Sigmoid curve: spread scores around 50%, compress extremes
+  //    center = expected average raw agreement, k = steepness
+  const SIGMOID_CENTER = 0.6;
+  const SIGMOID_K = 10;
+  const sigmoid = (x: number) =>
+    1 / (1 + Math.exp(-SIGMOID_K * (x - SIGMOID_CENTER)));
+  // Normalize so sigmoid(0)→0 and sigmoid(1)→1
+  const sigMin = sigmoid(0);
+  const sigMax = sigmoid(1);
+  const calibratedScore =
+    (sigmoid(tasteAgreement) - sigMin) / (sigMax - sigMin);
+
+  // 5) Confidence from both count and overlap ratio
+  const overlapBase = Math.min(user1Entries.length, user2Entries.length);
+  const overlapRatio = overlapBase > 0 ? shared / overlapBase : 0;
+  const countConfidence = Math.min(shared / 25, 1);
+  const ratioConfidence = Math.min(overlapRatio / 0.6, 1);
+  const confidence = Math.sqrt(countConfidence * ratioConfidence);
+
+  // 6) Pull toward neutral (50) when evidence is weak
   const compatibilityScore = Math.round(
-    neutralScore + (rawScore - neutralScore) * confidence
+    50 + (calibratedScore * 100 - 50) * confidence
   );
 
   disagreements.sort((a, b) => b.distance - a.distance);
@@ -369,6 +411,7 @@ export function computeComparison(
 
   return {
     compatibilityScore,
+    confidence,
     flavorText: getFlavorText(compatibilityScore),
     sharedSongsCount: sharedSongIds.length,
     totalSongs: songs.length,

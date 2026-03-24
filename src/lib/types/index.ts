@@ -43,6 +43,7 @@ export interface ProfileStats {
   tierCounts: Record<Tier, number>;
   favoriteEra: string | null;
   archetype: string;
+  archetypeDescription: string;
 }
 
 export interface UserComparisonStats {
@@ -64,6 +65,7 @@ export interface EraScore {
 
 export interface ComparisonResult {
   compatibilityScore: number;
+  confidence: number; // 0-1, how much shared data backs the score
   flavorText: string;
   sharedSongsCount: number;
   totalSongs: number;

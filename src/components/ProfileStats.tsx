@@ -1,5 +1,6 @@
 import type { ProfileStats as ProfileStatsType } from "@/lib/types";
 import { TIERS, TIER_COLORS } from "@/lib/constants";
+import ArchetypeCard from "./ArchetypeCard";
 
 interface ProfileStatsProps {
   stats: ProfileStatsType;
@@ -11,7 +12,10 @@ export default function ProfileStats({ stats }: ProfileStatsProps) {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard label="Songs Ranked" value={stats.totalRanked.toString()} />
         <StatCard label="Favorite Era" value={stats.favoriteEra ?? "—"} />
-        <StatCard label="Archetype" value={stats.archetype} />
+        <ArchetypeCard
+          archetype={stats.archetype}
+          description={stats.archetypeDescription}
+        />
         <StatCard
           label="S-Tier Songs"
           value={stats.tierCounts.S.toString()}
