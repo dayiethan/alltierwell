@@ -74,7 +74,7 @@ export const ARCHETYPE_DESCRIPTIONS: Record<string, string> = {
   "The Poet": "The Tortured Poets Department clicked for you in a way it didn't for everyone. You like your lyrics raw, literary, and a little unhinged.",
   "The Showgirl": "The Life of a Showgirl era is your thing. Big production, big energy, the kind of songs that feel like confetti is falling around you.",
   "The Swiftie": "You don't play favorites with the eras. Your rankings are spread across the whole discography, which honestly just means you have good taste across the board.",
-  "The Abigail": "You ranked every. single. song. That's dedication. You probably have opinions about deep cuts that most fans don't even know exist.",
+  "The Abigail": "You ranked every. single. song. That's dedication. You probably have opinions about deep cuts that most fans don't even know exist. You might just be Abigail.",
   "The Vault Keeper": "While everyone else is ranking the hits, you're over here putting vault tracks in your S-tier. You know where the real gems are hiding.",
 };
 
