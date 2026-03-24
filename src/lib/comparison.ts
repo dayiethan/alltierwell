@@ -180,7 +180,11 @@ export function computeComparison(
     };
   }
 
-  let totalDistance = 0;
+  // Weighted agreement band scoring:
+  // Same tier: 100, 1 apart: 70, 2 apart: 40, 3 apart: 15, 4+ apart: 0
+  const AGREEMENT_POINTS = [100, 70, 40, 15, 0, 0];
+
+  let totalPoints = 0;
   const sameTierSongs: Record<Tier, Song[]> = {
     S: [], A: [], B: [], C: [], D: [], F: [],
   };
@@ -205,7 +209,7 @@ export function computeComparison(
     if (!song) continue;
 
     const distance = Math.abs(TIER_ORDER[tier1] - TIER_ORDER[tier2]);
-    totalDistance += distance;
+    totalPoints += AGREEMENT_POINTS[Math.min(distance, 5)];
 
     if (distance === 0) {
       sameTierSongs[tier1].push(song);
@@ -236,8 +240,16 @@ export function computeComparison(
     albumStats[song.album].user2TierTotal += TIER_ORDER[tier2];
   }
 
-  const avgDistance = totalDistance / sharedSongIds.length;
-  const compatibilityScore = Math.round(100 * (1 - avgDistance / 5));
+  // Weighted agreement score with confidence discount
+  // Raw score: average points across shared songs (0-100)
+  // Confidence: ramps linearly from 0 to 1 over 30 shared songs
+  // Final: pulls toward neutral (50) when overlap is small
+  const rawScore = totalPoints / sharedSongIds.length;
+  const confidence = Math.min(sharedSongIds.length / 30, 1);
+  const neutralScore = 50;
+  const compatibilityScore = Math.round(
+    neutralScore + (rawScore - neutralScore) * confidence
+  );
 
   disagreements.sort((a, b) => b.distance - a.distance);
   const biggestDisagreements = disagreements.slice(0, 10);
