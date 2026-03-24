@@ -5,6 +5,7 @@ import type {
   ComparisonResult,
   UserComparisonStats,
   EraScore,
+  CommunityConsensus,
 } from "@/lib/types";
 import {
   TIER_ORDER,
@@ -14,6 +15,7 @@ import {
   getFlavorText,
   getGradingStyle,
 } from "@/lib/constants";
+import { computeSharedHotTakes } from "@/lib/consensus";
 
 function computeUserStats(entries: TierEntry[]): UserComparisonStats {
   const tierCounts: Record<Tier, number> = { S: 0, A: 0, B: 0, C: 0, D: 0, F: 0 };
@@ -92,7 +94,8 @@ function computeEraIdentity(
 export function computeComparison(
   user1Entries: TierEntry[],
   user2Entries: TierEntry[],
-  songs: Song[]
+  songs: Song[],
+  consensus?: Map<string, CommunityConsensus>
 ): ComparisonResult {
   const songMap = new Map(songs.map((s) => [s.id, s]));
   const user1Map = new Map(user1Entries.map((e) => [e.song_id, e.tier as Tier]));
@@ -134,6 +137,7 @@ export function computeComparison(
       },
       onlyUser1Ranked: [],
       onlyUser2Ranked: [],
+      sharedHotTakes: [],
     };
   }
 
@@ -305,6 +309,11 @@ export function computeComparison(
   onlyUser1Ranked.sort(sortByTier);
   onlyUser2Ranked.sort(sortByTier);
 
+  // Community consensus: shared hot takes
+  const sharedHotTakes = consensus
+    ? computeSharedHotTakes(user1Entries, user2Entries, consensus, songs)
+    : [];
+
   return {
     compatibilityScore,
     flavorText: getFlavorText(compatibilityScore),
@@ -332,5 +341,6 @@ export function computeComparison(
     },
     onlyUser1Ranked: onlyUser1Ranked.slice(0, 5),
     onlyUser2Ranked: onlyUser2Ranked.slice(0, 5),
+    sharedHotTakes,
   };
 }

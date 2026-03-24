@@ -94,6 +94,19 @@ export function getDisagreementLabel(distance: number): string {
   return "Minor Disagreement";
 }
 
+/** Round an average TIER_ORDER value (0-5) to the nearest Tier */
+export function tierOrderToTier(avgTierOrder: number): Tier {
+  const rounded = Math.round(Math.max(0, Math.min(5, avgTierOrder)));
+  return TIERS[rounded];
+}
+
+/** Label for how extreme a hot take is */
+export function getHotTakeLabel(distance: number): string {
+  if (distance >= 4) return "Scorching Take";
+  if (distance >= 3) return "Hot Take";
+  return "Warm Take";
+}
+
 /** Tier → score out of 10 mapping */
 export const TIER_SCORE: Record<Tier, number> = {
   S: 10,

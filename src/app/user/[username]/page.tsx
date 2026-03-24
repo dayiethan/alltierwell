@@ -6,9 +6,11 @@ import { normalizeSongs } from "@/lib/types";
 import ProfileStats from "@/components/ProfileStats";
 import TierListDisplay from "@/components/TierListDisplay";
 import ProfileAlbumRankings from "@/components/ProfileAlbumRankings";
+import HotTakesSection from "@/components/HotTakesSection";
 import ProfileActions from "./ProfileActions";
 import ProfileTheme from "./ProfileTheme";
 import Link from "next/link";
+import { computeCommunityConsensus, computeHotTakes } from "@/lib/consensus";
 
 interface Props {
   params: Promise<{ username: string }>;
@@ -59,23 +61,27 @@ export default async function UserProfilePage({ params }: Props) {
 
   const typedProfile = profile as UserProfile;
 
-  const [songsRes, entriesRes, authRes] = await Promise.all([
+  const [songsRes, entriesRes, allEntriesRes, authRes] = await Promise.all([
     supabase
       .from("songs")
       .select("*")
       .order("album_order")
       .order("track_number"),
     supabase.from("tier_entries").select("*").eq("user_id", typedProfile.id),
+    supabase.from("tier_entries").select("song_id, tier"),
     supabase.auth.getUser(),
   ]);
 
   const songs = normalizeSongs(songsRes.data ?? []);
   const entries = (entriesRes.data ?? []) as TierEntry[];
+  const allEntries = (allEntriesRes.data ?? []) as { song_id: string; tier: string }[];
   const currentUser = authRes.data.user;
   const isOwner = currentUser?.id === typedProfile.id;
   const isPrivate = !typedProfile.is_public && !isOwner;
 
   const stats = computeStats(entries, songs);
+  const consensus = computeCommunityConsensus(allEntries);
+  const hotTakes = computeHotTakes(entries, consensus, songs);
 
   // Log profile view (fire-and-forget, authenticated users only)
   if (currentUser && currentUser.id !== typedProfile.id) {
@@ -142,6 +148,13 @@ export default async function UserProfilePage({ params }: Props) {
           <div className="mt-6">
             <ProfileAlbumRankings entries={entries} songs={songs} />
           </div>
+
+          {/* Hot takes */}
+          {hotTakes.length > 0 && (
+            <div className="mt-6">
+              <HotTakesSection hotTakes={hotTakes} displayName={typedProfile.display_name} />
+            </div>
+          )}
 
           {/* Tier list */}
           <div className="mt-6">

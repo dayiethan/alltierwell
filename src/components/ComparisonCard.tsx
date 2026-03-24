@@ -8,6 +8,7 @@ import EraIdentity from "./comparison/EraIdentity";
 import EraRadarChart from "./comparison/EraRadarChart";
 import VaultSection from "./comparison/VaultSection";
 import RankingGaps from "./comparison/RankingGaps";
+import SharedHotTakes from "./comparison/SharedHotTakes";
 
 interface ComparisonCardProps {
   result: ComparisonResult;
@@ -80,6 +81,11 @@ export default function ComparisonCard({
         user2Name={user2Name}
       />
       <AlbumAlignment result={result} user1Name={user1Name} user2Name={user2Name} />
+      <SharedHotTakes
+        sharedHotTakes={result.sharedHotTakes}
+        user1Name={user1Name}
+        user2Name={user2Name}
+      />
       <RankingGaps
         onlyUser1Ranked={result.onlyUser1Ranked}
         onlyUser2Ranked={result.onlyUser2Ranked}

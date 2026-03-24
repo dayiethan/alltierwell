@@ -11,7 +11,9 @@ import {
   getSongAlbumColor,
   tierOrderToScore,
   ensureReadableColor,
+  tierOrderToTier,
 } from "@/lib/constants";
+import { computeCommunityConsensus } from "@/lib/consensus";
 
 export const metadata = {
   title: "Global Stats — All Tier Well",
@@ -321,6 +323,9 @@ export default async function StatsPage() {
         </section>
       </div>
 
+      {/* Community Rankings (by average tier) */}
+      <CommunityRankings entries={entries} songMap={songMap} />
+
       {/* Most controversial */}
       <section>
         <h2 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
@@ -400,6 +405,80 @@ function StatCard({ label, value }: { label: string; value: string }) {
       <p className="text-2xl font-bold">{value}</p>
       <p className="mt-0.5 text-xs text-muted-foreground">{label}</p>
     </div>
+  );
+}
+
+function CommunityRankings({
+  entries,
+  songMap,
+}: {
+  entries: { song_id: string; tier: string }[];
+  songMap: Map<string, Song>;
+}) {
+  const consensus = computeCommunityConsensus(entries);
+  const ranked = [...consensus.values()]
+    .filter((c) => c.totalVotes >= 3 && songMap.has(c.songId))
+    .sort((a, b) => a.avgTierOrder - b.avgTierOrder)
+    .slice(0, 15);
+
+  if (ranked.length === 0) {
+    return null;
+  }
+
+  return (
+    <section>
+      <h2 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+        Community Rankings
+      </h2>
+      <p className="mb-3 text-xs text-muted-foreground/60">
+        Top songs by average community tier (min. 3 votes)
+      </p>
+      <div className="rounded-xl border border-border p-4 space-y-2">
+        {ranked.map((item, i) => {
+          const song = songMap.get(item.songId)!;
+          const songImage = getSongImage(song);
+          const albumColor = getSongAlbumColor(song);
+          const score = tierOrderToScore(item.avgTierOrder);
+          return (
+            <div key={item.songId} className="flex items-center gap-2.5">
+              <span className="w-5 text-xs font-bold text-muted-foreground/50 text-right">
+                {i + 1}
+              </span>
+              {songImage ? (
+                <img
+                  src={songImage}
+                  alt=""
+                  className="h-7 w-7 rounded object-cover flex-shrink-0"
+                />
+              ) : (
+                <div
+                  className="h-7 w-7 rounded flex-shrink-0"
+                  style={{ backgroundColor: albumColor + "30" }}
+                />
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium truncate">{song.title}</p>
+              </div>
+              <span
+                className="text-[11px] font-bold px-2 py-0.5 rounded-full"
+                style={{
+                  backgroundColor: TIER_COLORS[item.consensusTier] + "25",
+                  color: TIER_COLORS[item.consensusTier],
+                }}
+              >
+                {item.consensusTier}
+              </span>
+              <span className="w-10 text-right text-sm font-bold" style={{ color: ensureReadableColor(albumColor) }}>
+                {score.toFixed(1)}
+              </span>
+              <span className="text-[10px] text-muted-foreground/60 w-12 text-right">
+                {item.totalVotes} votes
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 

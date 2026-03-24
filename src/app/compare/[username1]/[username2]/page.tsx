@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { computeComparison } from "@/lib/comparison";
 import { computeArchetype } from "@/lib/stats";
+import { computeCommunityConsensus } from "@/lib/consensus";
 import type { TierEntry, UserProfile } from "@/lib/types";
 import { normalizeSongs } from "@/lib/types";
 import ComparisonCard from "@/components/ComparisonCard";
@@ -45,7 +46,7 @@ export default async function ComparisonPage({ params }: Props) {
   const user1 = profile1Res.data as UserProfile;
   const user2 = profile2Res.data as UserProfile;
 
-  const [songsRes, entries1Res, entries2Res] = await Promise.all([
+  const [songsRes, entries1Res, entries2Res, allEntriesRes] = await Promise.all([
     supabase
       .from("songs")
       .select("*")
@@ -53,13 +54,16 @@ export default async function ComparisonPage({ params }: Props) {
       .order("track_number"),
     supabase.from("tier_entries").select("*").eq("user_id", user1.id),
     supabase.from("tier_entries").select("*").eq("user_id", user2.id),
+    supabase.from("tier_entries").select("song_id, tier"),
   ]);
 
   const songs = normalizeSongs(songsRes.data ?? []);
   const entries1 = (entries1Res.data ?? []) as TierEntry[];
   const entries2 = (entries2Res.data ?? []) as TierEntry[];
+  const allEntries = (allEntriesRes.data ?? []) as { song_id: string; tier: string }[];
 
-  const result = computeComparison(entries1, entries2, songs);
+  const consensus = computeCommunityConsensus(allEntries);
+  const result = computeComparison(entries1, entries2, songs, consensus);
   const user1Archetype = computeArchetype(entries1, songs);
   const user2Archetype = computeArchetype(entries2, songs);
 

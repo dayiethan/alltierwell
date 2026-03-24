@@ -107,4 +107,27 @@ export interface ComparisonResult {
   // Batch 3: Songs Only You Ranked (ranking gaps / implicit recommendations)
   onlyUser1Ranked: { song: Song; tier: Tier }[];
   onlyUser2Ranked: { song: Song; tier: Tier }[];
+  // Community consensus: shared hot takes
+  sharedHotTakes: {
+    song: Song;
+    user1Tier: Tier;
+    user2Tier: Tier;
+    communityTier: Tier;
+    avgDistance: number;
+  }[];
+}
+
+export interface CommunityConsensus {
+  songId: string;
+  avgTierOrder: number;
+  consensusTier: Tier;
+  totalVotes: number;
+}
+
+export interface HotTake {
+  song: Song;
+  userTier: Tier;
+  communityTier: Tier;
+  distance: number;
+  direction: "overrates" | "underrates";
 }
