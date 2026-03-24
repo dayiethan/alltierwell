@@ -1,61 +1,55 @@
 "use client";
 
-import { ALBUM_SHORT_NAMES } from "@/lib/constants";
-
-interface EraData {
-  album: string;
-  avgScore: number;
-  count: number;
-}
+import type { EraRadarScore } from "@/lib/types";
 
 interface EraRadarChartProps {
-  user1TopEras: EraData[];
-  user2TopEras: EraData[];
+  user1EraRadar: EraRadarScore[];
+  user2EraRadar: EraRadarScore[];
   user1Name: string;
   user2Name: string;
 }
 
 /**
- * Radar / spider chart comparing two users' era scores.
+ * Full era radar / spider chart comparing two users' scores across ALL eras.
  *
  * Score scale: S=0, A=1, B=2, C=3, D=4, F=5  (lower is better)
  * We invert so higher radius = better score:
- *   chartValue = (5 - avgScore) / 5   →  1 = perfect (all S), 0 = all F
+ *   chartValue = (5 - avgTier) / 5   →  1 = all S, 0 = all F
+ * Eras with no ranked songs (avgTier === -1) collapse to center (0).
  */
 export default function EraRadarChart({
-  user1TopEras,
-  user2TopEras,
+  user1EraRadar,
+  user2EraRadar,
   user1Name,
   user2Name,
 }: EraRadarChartProps) {
-  // Combine both users' albums into a unified axis set
-  const albumSet = new Set<string>();
-  for (const e of user1TopEras) albumSet.add(e.album);
-  for (const e of user2TopEras) albumSet.add(e.album);
+  const axisCount = user1EraRadar.length;
+  if (axisCount < 3) return null;
 
-  const albums = Array.from(albumSet);
-  const axisCount = albums.length;
+  // Check if at least one user has ranked songs in at least 3 eras
+  const user1Active = user1EraRadar.filter((e) => e.avgTier >= 0).length;
+  const user2Active = user2EraRadar.filter((e) => e.avgTier >= 0).length;
+  if (user1Active < 3 && user2Active < 3) return null;
 
-  if (axisCount < 3) return null; // need at least 3 axes for a meaningful radar
-
-  const user1Map = new Map(user1TopEras.map((e) => [e.album, e]));
-  const user2Map = new Map(user2TopEras.map((e) => [e.album, e]));
-
-  // Chart geometry — wide viewBox to give labels room
-  const size = 460;
+  // Chart geometry
+  const size = 480;
   const cx = size / 2;
   const cy = size / 2;
-  const maxRadius = 120;
-  const levels = 5; // concentric rings
+  const maxRadius = 130;
+  const levels = 5;
 
   function angleFor(i: number): number {
-    // Start from top (-90 deg) and go clockwise
     return (Math.PI * 2 * i) / axisCount - Math.PI / 2;
   }
 
   function pointAt(i: number, radius: number): [number, number] {
     const angle = angleFor(i);
     return [cx + radius * Math.cos(angle), cy + radius * Math.sin(angle)];
+  }
+
+  function toChartValue(avgTier: number): number {
+    if (avgTier < 0) return 0; // no data → center
+    return Math.max(0, Math.min(1, (5 - avgTier) / 5));
   }
 
   function polygonPoints(values: number[]): string {
@@ -68,75 +62,57 @@ export default function EraRadarChart({
       .join(" ");
   }
 
-  // Invert scores: lower avgScore = better = higher chart value
-  function toChartValue(avgScore: number): number {
-    return Math.max(0, Math.min(1, (5 - avgScore) / 5));
-  }
-
-  const user1Values = albums.map((album) => {
-    const entry = user1Map.get(album);
-    return entry ? toChartValue(entry.avgScore) : 0;
-  });
-
-  const user2Values = albums.map((album) => {
-    const entry = user2Map.get(album);
-    return entry ? toChartValue(entry.avgScore) : 0;
-  });
+  const user1Values = user1EraRadar.map((e) => toChartValue(e.avgTier));
+  const user2Values = user2EraRadar.map((e) => toChartValue(e.avgTier));
 
   // Concentric grid rings
   const gridRings = Array.from({ length: levels }, (_, i) => {
     const r = ((i + 1) / levels) * maxRadius;
-    const pts = albums
+    return user1EraRadar
       .map((_, j) => {
         const [x, y] = pointAt(j, r);
         return `${x},${y}`;
       })
       .join(" ");
-    return pts;
   });
 
   // Axis lines
-  const axisLines = albums.map((_, i) => {
+  const axisLines = user1EraRadar.map((_, i) => {
     const [x, y] = pointAt(i, maxRadius);
     return { x1: cx, y1: cy, x2: x, y2: y };
   });
 
-  // Labels positioned outside the chart with more room
-  const labelOffset = 28;
-  const labels = albums.map((album, i) => {
+  // Labels positioned outside the chart
+  const labelOffset = 20;
+  const labels = user1EraRadar.map((era, i) => {
     const angle = angleFor(i);
     const cos = Math.cos(angle);
     const sin = Math.sin(angle);
-    const shortName = ALBUM_SHORT_NAMES[album] ?? album;
 
-    // Push labels further out horizontally to prevent clipping
-    const extraHPad = Math.abs(cos) * 12;
+    const extraHPad = Math.abs(cos) * 10;
     const r = maxRadius + labelOffset + extraHPad;
     const x = cx + r * cos;
     const y = cy + r * sin;
 
     let anchor: "start" | "middle" | "end" = "middle";
-    if (cos > 0.2) anchor = "start";
-    else if (cos < -0.2) anchor = "end";
+    if (cos > 0.15) anchor = "start";
+    else if (cos < -0.15) anchor = "end";
 
-    return { x, y, text: shortName, anchor };
+    // Dim label if neither user has ranked songs in this era
+    const u1Active = user1EraRadar[i].avgTier >= 0;
+    const u2Active = user2EraRadar[i].avgTier >= 0;
+    const dimmed = !u1Active && !u2Active;
+
+    return { x, y, text: era.label, anchor, color: era.color, dimmed };
   });
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: "12px",
-        width: "100%",
-      }}
-    >
+    <div className="flex flex-col items-center gap-3 w-full">
       <svg
         viewBox={`0 0 ${size} ${size}`}
-        style={{ width: "100%", maxWidth: "460px", height: "auto" }}
+        className="w-full max-w-[480px] h-auto"
         role="img"
-        aria-label={`Radar chart comparing era scores between ${user1Name} and ${user2Name}`}
+        aria-label={`Era radar chart comparing ${user1Name} and ${user2Name}`}
       >
         {/* Grid rings */}
         {gridRings.map((pts, i) => (
@@ -146,7 +122,7 @@ export default function EraRadarChart({
             fill="none"
             stroke="var(--border)"
             strokeWidth={i === levels - 1 ? 1.5 : 0.7}
-            opacity={0.5}
+            opacity={0.4}
           />
         ))}
 
@@ -160,50 +136,75 @@ export default function EraRadarChart({
             y2={line.y2}
             stroke="var(--border)"
             strokeWidth={0.7}
-            opacity={0.4}
+            opacity={0.3}
           />
         ))}
 
         {/* User 1 polygon */}
         <polygon
           points={polygonPoints(user1Values)}
-          fill="rgba(96, 165, 250, 0.2)"
+          fill="rgba(96, 165, 250, 0.15)"
           stroke="rgb(96, 165, 250)"
           strokeWidth={2}
+          strokeLinejoin="round"
         />
 
         {/* User 2 polygon */}
         <polygon
           points={polygonPoints(user2Values)}
-          fill="rgba(244, 114, 182, 0.2)"
+          fill="rgba(244, 114, 182, 0.15)"
           stroke="rgb(244, 114, 182)"
           strokeWidth={2}
+          strokeLinejoin="round"
         />
 
         {/* Data points - User 1 */}
         {user1Values.map((v, i) => {
+          if (user1EraRadar[i].avgTier < 0) return null;
           const [x, y] = pointAt(i, v * maxRadius);
           return (
             <circle
               key={`u1-dot-${i}`}
               cx={x}
               cy={y}
-              r={3}
+              r={3.5}
               fill="rgb(96, 165, 250)"
+              stroke="white"
+              strokeWidth={1}
             />
           );
         })}
 
         {/* Data points - User 2 */}
         {user2Values.map((v, i) => {
+          if (user2EraRadar[i].avgTier < 0) return null;
           const [x, y] = pointAt(i, v * maxRadius);
           return (
             <circle
               key={`u2-dot-${i}`}
               cx={x}
               cy={y}
-              r={3}
+              r={3.5}
               fill="rgb(244, 114, 182)"
+              stroke="white"
+              strokeWidth={1}
+            />
+          );
+        })}
+
+        {/* Era-colored dots on the outer ring */}
+        {user1EraRadar.map((era, i) => {
+          const [x, y] = pointAt(i, maxRadius);
+          return (
+            <circle
+              key={`era-dot-${i}`}
+              cx={x}
+              cy={y}
+              r={4}
+              fill={era.color}
+              stroke="var(--border)"
+              strokeWidth={0.5}
+              opacity={0.6}
             />
           );
         })}
@@ -216,9 +217,11 @@ export default function EraRadarChart({
             y={label.y}
             textAnchor={label.anchor}
             dominantBaseline="central"
-            fill="var(--muted-foreground)"
-            fontSize={10}
-            fontFamily="sans-serif"
+            fill={label.dimmed ? "var(--muted-foreground)" : "var(--foreground)"}
+            fontSize={9.5}
+            fontFamily="system-ui, sans-serif"
+            fontWeight={label.dimmed ? 400 : 500}
+            opacity={label.dimmed ? 0.35 : 0.85}
           >
             {label.text}
           </text>
@@ -226,43 +229,16 @@ export default function EraRadarChart({
       </svg>
 
       {/* Legend */}
-      <div
-        style={{
-          display: "flex",
-          gap: "20px",
-          justifyContent: "center",
-          flexWrap: "wrap",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          <div
-            style={{
-              width: "12px",
-              height: "12px",
-              borderRadius: "2px",
-              backgroundColor: "rgb(96, 165, 250)",
-            }}
-          />
-          <span
-            className="text-xs text-muted-foreground"
-            style={{ maxWidth: "120px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-          >
+      <div className="flex gap-5 justify-center flex-wrap">
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: "rgb(96, 165, 250)" }} />
+          <span className="text-xs text-muted-foreground max-w-[120px] truncate">
             {user1Name}
           </span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          <div
-            style={{
-              width: "12px",
-              height: "12px",
-              borderRadius: "2px",
-              backgroundColor: "rgb(244, 114, 182)",
-            }}
-          />
-          <span
-            className="text-xs text-muted-foreground"
-            style={{ maxWidth: "120px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-          >
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: "rgb(244, 114, 182)" }} />
+          <span className="text-xs text-muted-foreground max-w-[120px] truncate">
             {user2Name}
           </span>
         </div>

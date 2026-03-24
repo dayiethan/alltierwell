@@ -94,6 +94,9 @@ export interface ComparisonResult {
   // Batch 2: Era Identity
   user1TopEras: EraScore[];
   user2TopEras: EraScore[];
+  // Full era radar data (one entry per era, chronological)
+  user1EraRadar: EraRadarScore[];
+  user2EraRadar: EraRadarScore[];
   // Batch 2: Deep Cut & Vault Soulmates
   deepCutSoulmates: { song: Song; tier: Tier }[];
   // Batch 2: Vault Track Verdict
@@ -122,6 +125,14 @@ export interface CommunityConsensus {
   avgTierOrder: number;
   consensusTier: Tier;
   totalVotes: number;
+}
+
+export interface EraRadarScore {
+  eraOrder: number;
+  label: string;
+  color: string;
+  avgTier: number; // 0-5 scale (S=0, F=5), -1 if no songs ranked
+  count: number;
 }
 
 export interface HotTake {

@@ -56,16 +56,8 @@ export default function ComparisonCard({
         user2Name={user2Name}
       />
       <EraRadarChart
-        user1TopEras={result.user1TopEras.map((e) => ({
-          album: e.album,
-          avgScore: e.avgTier,
-          count: e.count,
-        }))}
-        user2TopEras={result.user2TopEras.map((e) => ({
-          album: e.album,
-          avgScore: e.avgTier,
-          count: e.count,
-        }))}
+        user1EraRadar={result.user1EraRadar}
+        user2EraRadar={result.user2EraRadar}
         user1Name={user1Name}
         user2Name={user2Name}
       />

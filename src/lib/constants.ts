@@ -60,6 +60,21 @@ export const ALBUM_SHORT_NAMES: Record<string, string> = {
   "Non-Album": "Non-Album",
 };
 
+/** Unique eras in chronological order, merging original + TV versions */
+export const ERAS: { order: number; label: string; color: string }[] = (() => {
+  const seen = new Map<number, { order: number; label: string; color: string }>();
+  for (const album of ALBUMS) {
+    if (!seen.has(album.order)) {
+      seen.set(album.order, {
+        order: album.order,
+        label: ALBUM_SHORT_NAMES[album.name] ?? album.name,
+        color: album.color,
+      });
+    }
+  }
+  return [...seen.values()].sort((a, b) => a.order - b.order);
+})();
+
 export const COMPATIBILITY_FLAVOR: { min: number; text: string }[] = [
   { min: 95, text: "You Belong With Me" },
   { min: 85, text: "It's a Love Story" },

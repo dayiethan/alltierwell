@@ -5,6 +5,7 @@ import type {
   ComparisonResult,
   UserComparisonStats,
   EraScore,
+  EraRadarScore,
   CommunityConsensus,
 } from "@/lib/types";
 import {
@@ -12,6 +13,7 @@ import {
   TIERS,
   ALBUMS,
   ALBUM_SHORT_NAMES,
+  ERAS,
   getFlavorText,
   getGradingStyle,
 } from "@/lib/constants";
@@ -91,6 +93,41 @@ function computeEraIdentity(
     .slice(0, 3);
 }
 
+/**
+ * Compute per-era average tier for a user across ALL eras.
+ * Groups original + TV versions by album_order.
+ * Returns one entry per era in chronological order.
+ */
+function computeAllEraScores(
+  entries: TierEntry[],
+  songs: Song[]
+): EraRadarScore[] {
+  const songMap = new Map(songs.map((s) => [s.id, s]));
+
+  // Group by album_order (merges TV versions)
+  const eraStats: Record<number, { totalTier: number; count: number }> = {};
+  for (const entry of entries) {
+    const song = songMap.get(entry.song_id);
+    if (!song) continue;
+    if (!eraStats[song.album_order]) {
+      eraStats[song.album_order] = { totalTier: 0, count: 0 };
+    }
+    eraStats[song.album_order].totalTier += TIER_ORDER[entry.tier as Tier];
+    eraStats[song.album_order].count++;
+  }
+
+  return ERAS.map((era) => {
+    const stats = eraStats[era.order];
+    return {
+      eraOrder: era.order,
+      label: era.label,
+      color: era.color,
+      avgTier: stats ? stats.totalTier / stats.count : -1,
+      count: stats?.count ?? 0,
+    };
+  });
+}
+
 export function computeComparison(
   user1Entries: TierEntry[],
   user2Entries: TierEntry[],
@@ -127,6 +164,8 @@ export function computeComparison(
       albumAlignment: [],
       user1TopEras: computeEraIdentity(user1Entries, songs),
       user2TopEras: computeEraIdentity(user2Entries, songs),
+      user1EraRadar: computeAllEraScores(user1Entries, songs),
+      user2EraRadar: computeAllEraScores(user2Entries, songs),
       deepCutSoulmates: [],
       vaultVerdict: {
         user1VaultCount: 0,
@@ -234,6 +273,8 @@ export function computeComparison(
   // Batch 2: Era Identity
   const user1TopEras = computeEraIdentity(user1Entries, songs);
   const user2TopEras = computeEraIdentity(user2Entries, songs);
+  const user1EraRadar = computeAllEraScores(user1Entries, songs);
+  const user2EraRadar = computeAllEraScores(user2Entries, songs);
 
   // Batch 2: Deep Cut & Vault Soulmates
   const deepCutSoulmates: { song: Song; tier: Tier }[] = [];
@@ -331,6 +372,8 @@ export function computeComparison(
     albumAlignment,
     user1TopEras,
     user2TopEras,
+    user1EraRadar,
+    user2EraRadar,
     deepCutSoulmates,
     vaultVerdict: {
       user1VaultCount,
