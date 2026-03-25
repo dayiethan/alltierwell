@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 import { createClient } from "@/lib/supabase/server";
 import type { Song, Tier } from "@/lib/types";
 import { normalizeSongs } from "@/lib/types";
@@ -6,13 +8,11 @@ import {
   TIER_COLORS,
   TIER_ORDER,
   ALBUMS,
-  ALBUM_SHORT_NAMES,
   ERAS,
   getSongImage,
   getSongAlbumColor,
   tierOrderToScore,
   ensureReadableColor,
-  tierOrderToTier,
 } from "@/lib/constants";
 import { computeCommunityConsensus } from "@/lib/consensus";
 
@@ -528,4 +528,3 @@ function SongRow({
     </div>
   );
 }
-

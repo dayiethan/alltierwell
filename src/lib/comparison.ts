@@ -10,7 +10,6 @@ import type {
 } from "@/lib/types";
 import {
   TIER_ORDER,
-  TIERS,
   ALBUMS,
   ALBUM_SHORT_NAMES,
   ERAS,

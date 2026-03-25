@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 "use client";
 
 import type { Song, Tier, TierEntry } from "@/lib/types";

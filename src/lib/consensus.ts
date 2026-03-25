@@ -1,5 +1,5 @@
 import type { CommunityConsensus, HotTake, Song, Tier, TierEntry } from "@/lib/types";
-import { TIERS, TIER_ORDER, tierOrderToTier } from "@/lib/constants";
+import { TIER_ORDER, tierOrderToTier } from "@/lib/constants";
 
 /**
  * Compute community consensus (average tier) for every song

@@ -1,7 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import type { Song, Tier } from "@/lib/types";
+import type { Song, Tier, TierEntry } from "@/lib/types";
 import { normalizeSongs } from "@/lib/types";
 import { TIERS } from "@/lib/constants";
 import { useAutoSave } from "@/hooks/useAutoSave";
@@ -47,7 +47,7 @@ export default function RankPage() {
 
       if (entriesRes.data) {
         const initial = new Map<string, Tier>();
-        entriesRes.data.forEach((entry) => {
+        (entriesRes.data as TierEntry[]).forEach((entry) => {
           initial.set(entry.song_id, entry.tier as Tier);
         });
         setTierMap(initial);

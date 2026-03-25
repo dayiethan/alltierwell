@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import { createClient } from "@/lib/supabase/client";
+import type { AuthChangeEvent } from "@supabase/supabase-js";
 import type { EraTheme } from "@/lib/themes";
 import { getThemeById } from "@/lib/themes";
 import type { ThemeDefinition } from "@/lib/themes";
@@ -134,7 +135,7 @@ export default function ThemeProvider({
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
+    } = supabase.auth.onAuthStateChange((event: AuthChangeEvent) => {
       if (event === "SIGNED_OUT") {
         ownThemeRef.current = "default";
         setTemporaryThemeState(null);

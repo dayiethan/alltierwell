@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 "use client";
 
 import { useState } from "react";
@@ -28,8 +30,6 @@ export default function HotTakesSection({ hotTakes, displayName }: HotTakesSecti
         {visible.map((take) => {
           const songImage = getSongImage(take.song);
           const albumColor = getSongAlbumColor(take.song);
-          const label = getHotTakeLabel(take.distance);
-
           return (
             <div key={take.song.id} className="flex items-center gap-3">
               {songImage ? (
@@ -51,9 +51,9 @@ export default function HotTakesSection({ hotTakes, displayName }: HotTakesSecti
                 </p>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
-                <TierBadge tier={take.userTier} label={displayName} />
+                <TierBadge tier={take.userTier} />
                 <span className="text-xs text-muted-foreground">vs</span>
-                <TierBadge tier={take.communityTier} label="Community" />
+                <TierBadge tier={take.communityTier} />
               </div>
               <span
                 className="text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
@@ -62,7 +62,7 @@ export default function HotTakesSection({ hotTakes, displayName }: HotTakesSecti
                   color: take.distance >= 4 ? "#ef4444" : take.distance >= 3 ? "#f97316" : "#eab308",
                 }}
               >
-                {label}
+                {getHotTakeLabel(take.distance)}
               </span>
             </div>
           );
@@ -81,7 +81,7 @@ export default function HotTakesSection({ hotTakes, displayName }: HotTakesSecti
   );
 }
 
-function TierBadge({ tier, label }: { tier: Tier; label: string }) {
+function TierBadge({ tier }: { tier: Tier }) {
   return (
     <div className="flex flex-col items-center">
       <span

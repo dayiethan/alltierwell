@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 import { ImageResponse } from "@vercel/og";
 import { createClient } from "@supabase/supabase-js";
 import { computeStats } from "@/lib/stats";
@@ -132,6 +134,7 @@ export async function GET(request: Request) {
           {albumImageUrl && (
             <img
               src={albumImageUrl}
+              alt=""
               width={630}
               height={630}
               style={{

@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 "use client";
 
 import { useState } from "react";
@@ -12,15 +14,9 @@ interface SharedHotTakesProps {
     communityTier: Tier;
     avgDistance: number;
   }[];
-  user1Name: string;
-  user2Name: string;
 }
 
-export default function SharedHotTakes({
-  sharedHotTakes,
-  user1Name,
-  user2Name,
-}: SharedHotTakesProps) {
+export default function SharedHotTakes({ sharedHotTakes }: SharedHotTakesProps) {
   const [expanded, setExpanded] = useState(false);
 
   if (sharedHotTakes.length === 0) return null;

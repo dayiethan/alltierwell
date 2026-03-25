@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 import type { ComparisonResult, EraScore } from "@/lib/types";
 
 interface EraIdentityProps {

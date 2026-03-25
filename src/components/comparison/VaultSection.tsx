@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 "use client";
 
 import type { ComparisonResult, Tier } from "@/lib/types";

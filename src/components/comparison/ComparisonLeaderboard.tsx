@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
@@ -13,6 +15,20 @@ interface ComparisonEntry {
   };
   compatibilityScore: number;
   comparedAt: string;
+}
+
+interface ComparisonLogRow {
+  user1_id: string;
+  user2_id: string;
+  compatibility_score: number;
+  compared_at: string;
+}
+
+interface ComparisonProfileRow {
+  id: string;
+  display_name: string;
+  username: string;
+  avatar_url: string | null;
 }
 
 export default function ComparisonLeaderboard({
@@ -39,7 +55,9 @@ export default function ComparisonLeaderboard({
         return;
       }
 
-      const otherIds = comparisons.map((c) =>
+      const typedComparisons = comparisons as ComparisonLogRow[];
+
+      const otherIds = typedComparisons.map((c) =>
         c.user1_id === myUserId ? c.user2_id : c.user1_id
       );
 
@@ -48,9 +66,10 @@ export default function ComparisonLeaderboard({
         .select("id, display_name, username, avatar_url")
         .in("id", otherIds);
 
-      const profileMap = new Map(profiles?.map((p) => [p.id, p]) ?? []);
+      const typedProfiles = (profiles ?? []) as ComparisonProfileRow[];
+      const profileMap = new Map(typedProfiles.map((p) => [p.id, p]));
 
-      const mapped = comparisons
+      const mapped = typedComparisons
         .map((c) => {
           const otherId =
             c.user1_id === myUserId ? c.user2_id : c.user1_id;

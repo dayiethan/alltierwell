@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 import type { Song, Tier, TierEntry } from "@/lib/types";
 import { TIER_ORDER, ALBUMS, ERAS, tierOrderToScore, ensureReadableColor } from "@/lib/constants";
 

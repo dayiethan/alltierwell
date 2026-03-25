@@ -75,8 +75,6 @@ export default function ComparisonCard({
       <AlbumAlignment result={result} user1Name={user1Name} user2Name={user2Name} />
       <SharedHotTakes
         sharedHotTakes={result.sharedHotTakes}
-        user1Name={user1Name}
-        user2Name={user2Name}
       />
       <RankingGaps
         onlyUser1Ranked={result.onlyUser1Ranked}

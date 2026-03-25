@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
@@ -57,9 +59,14 @@ export default function LandingPage({ floatingImages }: LandingPageProps) {
   useWatermark(false);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    const loadUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       setIsLoggedIn(!!user);
-    });
+    };
+
+    loadUser();
   }, [supabase]);
 
   const handleSignIn = async () => {

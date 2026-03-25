@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 import { ImageResponse } from "@vercel/og";
 import { createClient } from "@supabase/supabase-js";
 import { computeComparison } from "@/lib/comparison";
@@ -118,6 +120,7 @@ export async function GET(request: Request) {
           {user1Image && (
             <img
               src={user1Image}
+              alt=""
               width={600}
               height={630}
               style={{
@@ -134,6 +137,7 @@ export async function GET(request: Request) {
           {user2Image && (
             <img
               src={user2Image}
+              alt=""
               width={600}
               height={630}
               style={{

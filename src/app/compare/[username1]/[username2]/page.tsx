@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { computeComparison } from "@/lib/comparison";
