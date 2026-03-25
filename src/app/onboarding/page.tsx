@@ -71,35 +71,42 @@ export default function OnboardingPage() {
     setSubmitting(true);
     setError(null);
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    if (!user) {
-      setError("Not authenticated. Please sign in again.");
-      setSubmitting(false);
-      return;
-    }
-
-    const { error: insertError } = await supabase.from("users").insert({
-      id: user.id,
-      username,
-      display_name: displayName || username,
-      avatar_url: avatarUrl,
-    });
-
-    if (insertError) {
-      if (insertError.code === "23505") {
-        setError("Username is already taken.");
-        setAvailable(false);
-      } else {
-        setError("Something went wrong. Please try again.");
+      if (!user) {
+        setError("Not authenticated. Please sign in again.");
+        setSubmitting(false);
+        return;
       }
-      setSubmitting(false);
-      return;
-    }
 
-    router.push("/rank");
+      const { error: insertError } = await supabase.from("users").insert({
+        id: user.id,
+        username,
+        display_name: displayName || username,
+        avatar_url: avatarUrl,
+      });
+
+      if (insertError) {
+        if (insertError.code === "23505") {
+          setError("Username is already taken.");
+          setAvailable(false);
+        } else {
+          setError("Something went wrong. Please try again.");
+          console.error("Profile insert error:", insertError);
+        }
+        setSubmitting(false);
+        return;
+      }
+
+      router.push("/rank");
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+      console.error("Profile creation error:", err);
+      setSubmitting(false);
+    }
   };
 
   const isValid = USERNAME_REGEX.test(username);

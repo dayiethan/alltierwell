@@ -197,7 +197,7 @@ export function computeComparison(
   const user1Loves: { song: Song; user1Tier: Tier; user2Tier: Tier }[] = [];
   const user2Loves: { song: Song; user1Tier: Tier; user2Tier: Tier }[] = [];
 
-  const albumStats: Record<string, { totalDistance: number; count: number; user1TierTotal: number; user2TierTotal: number }> = {};
+  const albumStats: Record<number, { totalDistance: number; count: number; user1TierTotal: number; user2TierTotal: number }> = {};
 
   for (const songId of sharedSongIds) {
     const tier1 = user1Map.get(songId)!;
@@ -227,14 +227,15 @@ export function computeComparison(
       user2Loves.push({ song, user1Tier: tier1, user2Tier: tier2 });
     }
 
-    // Album alignment
-    if (!albumStats[song.album]) {
-      albumStats[song.album] = { totalDistance: 0, count: 0, user1TierTotal: 0, user2TierTotal: 0 };
+    // Album alignment — group by album_order to merge TV versions
+    const eraKey = song.album_order;
+    if (!albumStats[eraKey]) {
+      albumStats[eraKey] = { totalDistance: 0, count: 0, user1TierTotal: 0, user2TierTotal: 0 };
     }
-    albumStats[song.album].totalDistance += distance;
-    albumStats[song.album].count++;
-    albumStats[song.album].user1TierTotal += TIER_ORDER[tier1];
-    albumStats[song.album].user2TierTotal += TIER_ORDER[tier2];
+    albumStats[eraKey].totalDistance += distance;
+    albumStats[eraKey].count++;
+    albumStats[eraKey].user1TierTotal += TIER_ORDER[tier1];
+    albumStats[eraKey].user2TierTotal += TIER_ORDER[tier2];
   }
 
   // --- Compatibility score: weighted bands + style-adjusted + sigmoid + confidence ---
@@ -309,12 +310,14 @@ export function computeComparison(
   );
 
   const albumAlignment = Object.entries(albumStats)
-    .map(([album, { totalDistance: dist, count, user1TierTotal, user2TierTotal }]) => {
-      const albumData = ALBUMS.find((a) => a.name === album);
+    .map(([eraOrderStr, { totalDistance: dist, count, user1TierTotal, user2TierTotal }]) => {
+      const eraOrder = Number(eraOrderStr);
+      const era = ERAS.find((e) => e.order === eraOrder);
+      const albumData = ALBUMS.find((a) => a.order === eraOrder);
       return {
-        album: ALBUM_SHORT_NAMES[album] ?? album,
-        fullName: album,
-        albumColor: albumData?.color ?? "#888",
+        album: era?.label ?? `Era ${eraOrder}`,
+        fullName: albumData?.name ?? `Era ${eraOrder}`,
+        albumColor: era?.color ?? "#888",
         albumImage: albumData?.image,
         score: Math.round(100 * (1 - dist / count / 5)),
         sharedCount: count,

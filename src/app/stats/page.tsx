@@ -7,6 +7,7 @@ import {
   TIER_ORDER,
   ALBUMS,
   ALBUM_SHORT_NAMES,
+  ERAS,
   getSongImage,
   getSongAlbumColor,
   tierOrderToScore,
@@ -128,31 +129,31 @@ export default async function StatsPage() {
     .sort((a, b) => b.stdDev - a.stdDev)
     .slice(0, 10);
 
-  // Average tier per album
-  const albumAgg: Record<string, { totalTier: number; count: number }> = {};
+  // Average tier per era (grouped by album_order)
+  const eraAgg: Record<number, { totalTier: number; count: number }> = {};
   for (const [songId, stats] of songStats) {
     const song = songMap.get(songId);
     if (!song) continue;
-    if (!albumAgg[song.album]) {
-      albumAgg[song.album] = { totalTier: 0, count: 0 };
+    if (!eraAgg[song.album_order]) {
+      eraAgg[song.album_order] = { totalTier: 0, count: 0 };
     }
     for (const tier of TIERS) {
-      albumAgg[song.album].totalTier +=
+      eraAgg[song.album_order].totalTier +=
         stats.tierCounts[tier] * TIER_ORDER[tier];
-      albumAgg[song.album].count += stats.tierCounts[tier];
+      eraAgg[song.album_order].count += stats.tierCounts[tier];
     }
   }
 
-  const albumRankings = Object.entries(albumAgg)
-    .map(([album, { totalTier, count }]) => {
-      const albumData = ALBUMS.find((a) => a.name === album) as
-        | { name: string; color: string; image: string }
-        | undefined;
+  const albumRankings = Object.entries(eraAgg)
+    .map(([eraOrderStr, { totalTier, count }]) => {
+      const eraOrder = Number(eraOrderStr);
+      const era = ERAS.find((e) => e.order === eraOrder);
+      const albumData = ALBUMS.find((a) => a.order === eraOrder);
       const avgTier = count > 0 ? totalTier / count : 3;
       return {
-        album,
-        shortName: ALBUM_SHORT_NAMES[album] ?? album,
-        albumColor: albumData?.color ?? "#888",
+        album: era?.label ?? `Era ${eraOrder}`,
+        shortName: era?.label ?? `Era ${eraOrder}`,
+        albumColor: era?.color ?? "#888",
         albumImage: albumData?.image,
         avgTier,
         score: tierOrderToScore(avgTier),

@@ -1,15 +1,15 @@
 import type { Song, Tier, TierEntry } from "@/lib/types";
-import { TIER_ORDER, ALBUMS, ALBUM_SHORT_NAMES, tierOrderToScore, ensureReadableColor } from "@/lib/constants";
+import { TIER_ORDER, ALBUMS, ERAS, tierOrderToScore, ensureReadableColor } from "@/lib/constants";
 
 interface AlbumRanking {
-  album: string;
+  eraOrder: number;
   shortName: string;
   albumColor: string;
   albumImage?: string;
   avgTier: number;
   score: number;
   rankedCount: number;
-  totalInAlbum: number;
+  totalInEra: number;
 }
 
 export default function ProfileAlbumRankings({
@@ -23,38 +23,40 @@ export default function ProfileAlbumRankings({
 
   const songMap = new Map(songs.map((s) => [s.id, s]));
 
-  // Count total songs per album
-  const albumSongCounts: Record<string, number> = {};
+  // Count total songs per era (grouped by album_order)
+  const eraSongCounts: Record<number, number> = {};
   for (const song of songs) {
-    albumSongCounts[song.album] = (albumSongCounts[song.album] ?? 0) + 1;
+    eraSongCounts[song.album_order] = (eraSongCounts[song.album_order] ?? 0) + 1;
   }
 
-  // Aggregate user's tier values per album
-  const albumStats: Record<string, { totalTier: number; count: number }> = {};
+  // Aggregate user's tier values per era
+  const eraStats: Record<number, { totalTier: number; count: number }> = {};
   for (const entry of entries) {
     const song = songMap.get(entry.song_id);
     if (!song) continue;
-    if (!albumStats[song.album]) {
-      albumStats[song.album] = { totalTier: 0, count: 0 };
+    if (!eraStats[song.album_order]) {
+      eraStats[song.album_order] = { totalTier: 0, count: 0 };
     }
-    albumStats[song.album].totalTier += TIER_ORDER[entry.tier as Tier];
-    albumStats[song.album].count++;
+    eraStats[song.album_order].totalTier += TIER_ORDER[entry.tier as Tier];
+    eraStats[song.album_order].count++;
   }
 
-  const rankings: AlbumRanking[] = Object.entries(albumStats)
+  const rankings: AlbumRanking[] = Object.entries(eraStats)
     .filter(([, stats]) => stats.count >= 1)
-    .map(([album, stats]) => {
-      const albumData = ALBUMS.find((a) => a.name === album);
+    .map(([eraOrderStr, stats]) => {
+      const eraOrder = Number(eraOrderStr);
+      const era = ERAS.find((e) => e.order === eraOrder);
+      const albumData = ALBUMS.find((a) => a.order === eraOrder);
       const avgTier = stats.totalTier / stats.count;
       return {
-        album,
-        shortName: ALBUM_SHORT_NAMES[album] ?? album,
-        albumColor: albumData?.color ?? "#888",
+        eraOrder,
+        shortName: era?.label ?? `Era ${eraOrder}`,
+        albumColor: era?.color ?? "#888",
         albumImage: albumData?.image,
         avgTier,
         score: tierOrderToScore(avgTier),
         rankedCount: stats.count,
-        totalInAlbum: albumSongCounts[album] ?? 0,
+        totalInEra: eraSongCounts[eraOrder] ?? 0,
       };
     })
     .sort((a, b) => b.score - a.score);
@@ -69,10 +71,10 @@ export default function ProfileAlbumRankings({
       <div className="rounded-xl border border-border p-4 space-y-3">
         {rankings.map((a, i) => {
           const completionPct = Math.round(
-            (a.rankedCount / a.totalInAlbum) * 100
+            (a.rankedCount / a.totalInEra) * 100
           );
           return (
-            <div key={a.album} className="flex items-center gap-3">
+            <div key={a.eraOrder} className="flex items-center gap-3">
               <span className="w-5 text-xs font-bold text-muted-foreground/50 text-right">
                 {i + 1}
               </span>
@@ -94,7 +96,7 @@ export default function ProfileAlbumRankings({
                     {a.shortName}
                   </span>
                   <span className="text-[10px] text-muted-foreground/50">
-                    {a.rankedCount}/{a.totalInAlbum} songs
+                    {a.rankedCount}/{a.totalInEra} songs
                     {completionPct < 100 && ` (${completionPct}%)`}
                   </span>
                 </div>
