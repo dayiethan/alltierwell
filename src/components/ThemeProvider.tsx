@@ -105,8 +105,8 @@ export default function ThemeProvider({
   children: React.ReactNode;
 }) {
   const [theme, setThemeState] = useState<EraTheme>("default");
+  const [temporaryTheme, setTemporaryThemeState] = useState<EraTheme | null>(null);
   const ownThemeRef = useRef<EraTheme>("default");
-  const temporaryThemeRef = useRef<EraTheme | null>(null);
   const supabase = createClient();
 
   // Load saved theme on mount + reset on sign-out
@@ -127,7 +127,6 @@ export default function ThemeProvider({
           const userTheme = data.theme_era as EraTheme;
           ownThemeRef.current = userTheme;
           setThemeState(userTheme);
-          applyTheme(userTheme);
         }
       }
     };
@@ -138,18 +137,18 @@ export default function ThemeProvider({
     } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") {
         ownThemeRef.current = "default";
+        setTemporaryThemeState(null);
         setThemeState("default");
-        applyTheme("default");
       }
     });
 
     return () => subscription.unsubscribe();
   }, [supabase]);
 
-  // Apply theme whenever it changes
+  // Apply the owned theme or any temporary override
   useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
+    applyTheme(temporaryTheme ?? theme);
+  }, [theme, temporaryTheme]);
 
   const setTheme = useCallback(
     async (newTheme: EraTheme) => {
@@ -171,16 +170,14 @@ export default function ThemeProvider({
   );
 
   const setTemporaryTheme = useCallback((themeId: EraTheme) => {
-    temporaryThemeRef.current = themeId;
-    applyTheme(themeId);
+    setTemporaryThemeState(themeId);
   }, []);
 
   const clearTemporaryTheme = useCallback(() => {
-    temporaryThemeRef.current = null;
-    applyTheme(ownThemeRef.current);
+    setTemporaryThemeState(null);
   }, []);
 
-  const activeTheme = temporaryThemeRef.current ?? theme;
+  const activeTheme = temporaryTheme ?? theme;
   const themeDef = getThemeById(activeTheme);
 
   return (

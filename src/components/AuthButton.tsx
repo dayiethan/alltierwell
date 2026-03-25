@@ -17,11 +17,9 @@ export default function AuthButton({ user, loading, onNavigate }: AuthButtonProp
   const supabase = createClient();
 
   useEffect(() => {
-    if (!user) {
-      setUsername(null);
-      setAvatarUrl(null);
-      return;
-    }
+    if (!user) return;
+
+    let cancelled = false;
 
     const fetchProfile = async () => {
       const { data: profile } = await supabase
@@ -29,13 +27,20 @@ export default function AuthButton({ user, loading, onNavigate }: AuthButtonProp
         .select("username, avatar_url")
         .eq("id", user.id)
         .single();
-      if (profile) {
+      if (!cancelled && profile) {
         setUsername(profile.username);
         setAvatarUrl(profile.avatar_url);
       }
     };
     fetchProfile();
+
+    return () => {
+      cancelled = true;
+    };
   }, [user, supabase]);
+
+  const profileUsername = user ? username : null;
+  const profileAvatarUrl = user ? avatarUrl : null;
 
   const handleSignIn = async () => {
     await supabase.auth.signInWithOAuth({
@@ -55,10 +60,10 @@ export default function AuthButton({ user, loading, onNavigate }: AuthButtonProp
   if (user) {
     return (
       <div className="flex items-center">
-        {avatarUrl && username ? (
-          <Link href={`/user/${username}`} onClick={onNavigate}>
+        {profileAvatarUrl && profileUsername ? (
+          <Link href={`/user/${profileUsername}`} onClick={onNavigate}>
             <img
-              src={avatarUrl}
+              src={profileAvatarUrl}
               alt="Avatar"
               className="h-7 w-7 rounded-full object-cover hover:ring-2 hover:ring-gray-300 transition-all"
               referrerPolicy="no-referrer"
@@ -66,7 +71,7 @@ export default function AuthButton({ user, loading, onNavigate }: AuthButtonProp
           </Link>
         ) : (
           <Link
-            href={username ? `/user/${username}` : "/settings"}
+            href={profileUsername ? `/user/${profileUsername}` : "/settings"}
             onClick={onNavigate}
             className="flex h-7 w-7 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground hover:ring-2 hover:ring-gray-300 transition-all"
           >

@@ -244,7 +244,7 @@ export default function LandingPage({ floatingImages }: LandingPageProps) {
           Preview
         </h2>
         <p className="mt-2 text-center text-sm text-muted-foreground">
-          Drag and drop songs into tiers — here&apos;s what it looks like
+          Click songs to assign them to tiers — here&apos;s what it looks like
         </p>
         <div className="mx-auto mt-8 max-w-2xl overflow-hidden rounded-xl border border-border shadow-sm">
           {SAMPLE_TIER_LIST.map(({ tier, songs }) => (

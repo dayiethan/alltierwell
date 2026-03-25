@@ -20,21 +20,28 @@ const FONT_FILES: Record<string, { file: string; name: string }> = {
 
 const ALBUM_TO_THEME: Record<string, EraTheme> = {
   "Taylor Swift": "taylor-swift",
+  Debut: "taylor-swift",
   Fearless: "fearless",
   "Fearless (Taylor's Version)": "fearless",
+  "Fearless (TV)": "fearless",
   "Speak Now": "speak-now",
   "Speak Now (Taylor's Version)": "speak-now",
+  "Speak Now (TV)": "speak-now",
   Red: "red",
   "Red (Taylor's Version)": "red",
+  "Red (TV)": "red",
   "1989": "1989",
   "1989 (Taylor's Version)": "1989",
+  "1989 (TV)": "1989",
   reputation: "reputation",
   Lover: "lover",
   folklore: "folklore",
   evermore: "evermore",
   Midnights: "midnights",
   "The Tortured Poets Department": "ttpd",
+  TTPD: "ttpd",
   "The Life of a Showgirl": "showgirl",
+  Showgirl: "showgirl",
 };
 
 export async function GET(request: Request) {

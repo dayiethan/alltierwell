@@ -34,9 +34,10 @@ export default async function ComparisonPage({ params }: Props) {
   const { username1, username2 } = await params;
   const supabase = await createClient();
 
-  const [profile1Res, profile2Res] = await Promise.all([
+  const [profile1Res, profile2Res, authRes] = await Promise.all([
     supabase.from("users").select("*").eq("username", username1).single(),
     supabase.from("users").select("*").eq("username", username2).single(),
+    supabase.auth.getUser(),
   ]);
 
   if (!profile1Res.data || !profile2Res.data) {
@@ -45,6 +46,22 @@ export default async function ComparisonPage({ params }: Props) {
 
   const user1 = profile1Res.data as UserProfile;
   const user2 = profile2Res.data as UserProfile;
+  const currentUser = authRes.data.user;
+
+  const canViewUser1 = user1.is_public || currentUser?.id === user1.id;
+  const canViewUser2 = user2.is_public || currentUser?.id === user2.id;
+
+  if (!canViewUser1 || !canViewUser2) {
+    return (
+      <div className="py-16 text-center">
+        <h1 className="text-2xl font-bold">Comparison unavailable</h1>
+        <p className="mt-3 text-sm text-muted-foreground">
+          One or both of these tier lists are private, so this comparison
+          can&apos;t be shown.
+        </p>
+      </div>
+    );
+  }
 
   const [songsRes, entries1Res, entries2Res, allEntriesRes] = await Promise.all([
     supabase

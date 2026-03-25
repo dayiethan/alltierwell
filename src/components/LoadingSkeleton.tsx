@@ -1,14 +1,16 @@
 export function TierListSkeleton() {
+  const rowSizes = [3, 5, 4, 6, 4, 5];
+
   return (
     <div className="space-y-4 animate-pulse">
       <div className="h-8 w-48 rounded bg-gray-200" />
       <div className="h-4 w-full rounded bg-gray-100" />
       <div className="overflow-hidden rounded-lg border border-gray-200">
-        {Array.from({ length: 6 }).map((_, i) => (
+        {rowSizes.map((chipCount, i) => (
           <div key={i} className="flex h-[52px] border-b border-gray-200">
             <div className="w-14 bg-gray-200" />
             <div className="flex flex-1 items-center gap-2 p-2">
-              {Array.from({ length: 3 + Math.floor(Math.random() * 4) }).map(
+              {Array.from({ length: chipCount }).map(
                 (_, j) => (
                   <div key={j} className="h-6 w-24 rounded bg-gray-100" />
                 )
