@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const PROTECTED_ROUTES = ["/rank", "/onboarding", "/compare", "/settings"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   });
@@ -47,14 +47,12 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith(route)
   );
 
-  // Redirect unauthenticated users from protected routes
   if (isProtected && !user) {
     const url = request.nextUrl.clone();
     url.pathname = "/";
     return NextResponse.redirect(url);
   }
 
-  // If authenticated, check if user has a username
   if (user && isProtected && pathname !== "/onboarding") {
     const { data: profile } = await supabase
       .from("users")
@@ -62,14 +60,12 @@ export async function middleware(request: NextRequest) {
       .eq("id", user.id)
       .single();
 
-    // No profile yet — redirect to onboarding
     if (!profile) {
       const url = request.nextUrl.clone();
       url.pathname = "/onboarding";
       return NextResponse.redirect(url);
     }
 
-    // Update last_active_at (fire-and-forget)
     supabase
       .from("users")
       .update({ last_active_at: new Date().toISOString() })
@@ -77,7 +73,6 @@ export async function middleware(request: NextRequest) {
       .then();
   }
 
-  // If user already has a profile, don't let them visit onboarding
   if (user && pathname === "/onboarding") {
     const { data: profile } = await supabase
       .from("users")
