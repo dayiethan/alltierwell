@@ -13,18 +13,66 @@ interface SongPoolProps {
 
 export default function SongPool({ songs, onSongClick }: SongPoolProps) {
   const [selectedAlbum, setSelectedAlbum] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const tabsRef = useRef<HTMLDivElement>(null);
   const { themeDef } = useTheme();
 
-  const filteredSongs = selectedAlbum
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+
+  const albumFilteredSongs = selectedAlbum
     ? songs.filter((s) => s.album === selectedAlbum)
     : songs;
+
+  const filteredSongs = normalizedQuery
+    ? albumFilteredSongs.filter((song) => {
+        const albumLabel = ALBUM_SHORT_NAMES[song.album] ?? song.album;
+        return (
+          song.title.toLowerCase().includes(normalizedQuery) ||
+          song.album.toLowerCase().includes(normalizedQuery) ||
+          albumLabel.toLowerCase().includes(normalizedQuery)
+        );
+      })
+    : albumFilteredSongs;
+
+  const showingFilteredResults =
+    selectedAlbum !== null || normalizedQuery.length > 0;
 
   return (
     <div className="mt-6">
       <h3 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-        Unranked Songs ({songs.length})
+        Unranked Songs
       </h3>
+      <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-muted-foreground">
+          {showingFilteredResults ? (
+            <>
+              Showing {filteredSongs.length} of {songs.length} unranked songs
+            </>
+          ) : (
+            <>{songs.length} songs available to rank</>
+          )}
+        </p>
+
+        <div className="relative w-full sm:max-w-xs">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search songs or eras..."
+            className="w-full rounded-md border border-border bg-card py-2 pl-3 pr-10 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+              aria-label="Clear search"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+      </div>
 
       {/* Album filter tabs */}
       <div
@@ -73,7 +121,9 @@ export default function SongPool({ songs, onSongClick }: SongPoolProps) {
           <p className="py-4 text-sm text-muted-foreground italic">
             {songs.length === 0
               ? themeDef.emptyStates.allRanked
-              : "No unranked songs in this album."}
+              : normalizedQuery
+                ? "No unranked songs match this search."
+                : "No unranked songs in this album."}
           </p>
         )}
       </div>
